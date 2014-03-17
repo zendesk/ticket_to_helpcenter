@@ -1,0 +1,39 @@
+<ul class="show_comment">
+  <li>
+    Title: <br>
+    <input type="text" name="title" class="title" placeholder="Posted from ticket #{{ticket_id}} via Ticket to Help Center App"></input>
+  </li>
+  <li>
+    HTML Body: <br>
+    <textarea class="show_comment" contenteditable="true">{{comment}}</textarea>
+  </li>
+  <br>
+  <li class="actions">
+     <button class="back_to_comments btn btn-small">Back</button> | <button class="btn btn-small" id="modal_toggle">Open editor</button> | <button class="done_editing btn btn-primary btn-small" id="done_editing_sidebar">Next...</button>
+  </li>
+</ul>
+
+<!-- modal -->
+<div id="modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Ticket to Help Center</h3>
+  </div>
+  <div class="modal-body">
+    <ul class="show_comment_modal">
+      <li>
+        Title: <br>
+        <input type="text" name="title" class="title" id="modal_title" placeholder="Posted from ticket #{{ticket_id}} via Ticket to Help Center App"></input>
+      </li>
+      <li>
+        HTML Body: <br>
+        <textarea class="show_comment" id="modal_content" contenteditable="true">{{comment}}</textarea>
+      </li>
+    </ul>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+    <button class="btn" id="close_button" data-dismiss="modal" aria-hidden="true">Close</button>
+    <button class="done_editing btn btn-primary btn-small" id="done_editing_modal" data-dismiss="modal">Next...</button>
+  </div>
+</div>

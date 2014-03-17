@@ -1,0 +1,5 @@
+<ul class="editor_link">
+  <li class="actions">
+    <a href="#" class="back_to_comments">Back</a> | <a href="{{url}}" class="open_hc" target="blank">Open Help Center</a>
+  </li>
+</ul>

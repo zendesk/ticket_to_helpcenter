@@ -1,0 +1,131 @@
+li.comment {
+  border-top: 1px dotted LightSlateGray;
+  padding-bottom: 15px;
+  padding-top: 10px;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 310px;
+  max-height: 38px;
+  -webkit-transition: all 500ms ease;
+  -moz-transition: all 500ms ease;
+  -ms-transition: all 500ms ease;
+  -o-transition: all 500ms ease;
+  transition: all 500ms ease;
+  .time {
+    color: LightSlateGray;
+  }
+
+}
+li.comment:hover {
+  cursor: pointer;
+  background-color: rgba(120, 163, 0, 0.1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  
+  width: 310px;
+  max-height: 200px;
+  -webkit-transition: all 500ms ease;
+  -moz-transition: all 500ms ease;
+  -ms-transition: all 500ms ease;
+  -o-transition: all 500ms ease;
+  transition: all 500ms ease;
+  
+}
+ul {
+  margin: 0;
+  li.article_options {
+    margin-bottom:20px;
+  }
+  li.actions {
+    text-align: right;
+  }
+}
+ul.comment_list {
+  border-bottom: 1px solid LightSlateGray;
+  // border-top: 1px solid LightSlateGray;
+  padding: 0;
+  width: 310px;
+}
+ul.show_comment {
+  textarea {
+    min-height: 200px;
+    max-height: 700px;
+    width: 310px;
+  }
+  .title {
+    width: 310px;
+  }
+
+}
+div#modal {
+  width: 80%;
+  height: 530px;
+  position: fixed;
+  left:10%;
+  right:10%;
+  top: 10%;
+  margin: 0;
+  padding: 0;
+  ul.show_comment_modal {
+    textarea {
+      min-height: 320px;
+      max-height: 1000px;
+      width: 98%;
+    }
+    .title {
+      width: 98%;
+    }
+  }
+  div.modal-body {
+    // height: 80%;
+  }
+  div.modal-footer {
+    // position: absolute;
+    // bottom: 0;
+    // left: 0 !important;
+    // width: 95%;
+  }
+}
+select.section {
+  width: 310px;
+}
+ul.show_article {
+  li {
+    ul {
+      li {
+        margin-left: 1.8em;
+      }
+    }
+    div.property {
+      display: inline-block;
+      border: 1px solid gray;
+      border-radius: 5px;
+      padding: 3px;
+      font-weight: bold;
+    }
+    #draft {
+        background-color: rgb(245, 202, 0);
+    }
+    #promoted {
+        background-color: #78a300;
+    }
+    #comments_disabled {
+        background-color: rgb(232, 42, 42);
+    }
+    div.label {
+      display: inline-block;
+      border: 1px solid gray;
+      border-radius: 5px;
+      padding: 3px;
+    }
+  }
+  li.article_links {
+      text-align: center;
+  } 
+  li.properties {
+      text-align: center;
+  }
+}
+
+

@@ -1,0 +1,35 @@
+<ul class="show_article">
+  {{#each translations}}
+    <li class="title"><h4>{{this.title}}</h4></li><br>
+    <li class="body">{{{this.body}}}</li><br>
+  {{/each}}
+  <li class="labels">
+
+  </li>
+  <br>
+  <li class="properties">
+    {{#if article.draft}}
+      <div class="property" id="draft">
+        <i class="icon-check"></i> Draft
+      </div> 
+    {{/if}} 
+    {{#if article.promoted}} 
+      <div class="property" id="promoted">
+        <i class="icon-check"></i> Promoted
+      </div> 
+    {{/if}} 
+    {{#if article.comments_disabled}} 
+      <div class="property" id="comments_disabled">
+        <i class="icon-check"></i> Comments Disabled
+      </div>
+    {{/if}}
+  </li>
+  <br>
+  <li class="article_links">
+    <a href="{{article.html_url}}" class="btn btn-small" target="blank">View</a> | <a href="{{article.edit_url}}" class="btn btn-small" target="blank">Edit</a>
+  </li>
+  <br>
+  <li class="actions">
+    <a href="#" class="done btn btn-primary">Done</a>
+  </li>
+</ul>

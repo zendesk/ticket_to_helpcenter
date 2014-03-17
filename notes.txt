@@ -1,0 +1,25 @@
+https://joeshelpcenter.zendesk.com/hc/admin/articles/new?title=title&body=content
+
+
+//grab query string parameters and enter them as title and content
+(function($) {
+  $.QueryString = (function(a) {
+      if (a == "") return {};
+      var b = {};
+      for (var i = 0; i < a.length; ++i)
+      {
+          var p=a[i].split('=');
+          if (p.length != 2) continue;
+          b[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
+      }
+      return b;
+  })(window.location.search.substr(1).split('&'))
+})(jQuery);
+
+var title = $.QueryString["title"],
+    content = $.QueryString["body"];
+if (title || content) {
+  $('input#article_translations_attributes_0_title').val(title);
+  tinyMCE.activeEditor.setContent(content);
+}
+});
