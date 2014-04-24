@@ -156,6 +156,10 @@
           categories: categories,
           locales: locales
         });
+
+        //also get the available labels and then call jquery UI's autocomplete (or similar)
+
+        ///  api/v2/help_center/articles/labels.json
         
       });
       // console.log(e);
@@ -187,7 +191,7 @@
 
 
 
-      var labels = '[]',
+      var label_names = this.$('input.labels').val().split(/\W/),
           draft = this.$('input.draft').prop("checked"),
           promoted = this.$('input.promoted').prop("checked"),
           comments_disabled = this.$('input.comments_disabled').prop("checked"),
@@ -197,12 +201,17 @@
           title = (this.title || default_title),
           html_single_quotes = this.html.replace(/"/gm, "'"),
           body = html_single_quotes.replace(/(\r\n|\n|\r)/gm," "), //remove line breaks
-          article = helpers.fmt(
-            '{"article": {"labels": %@,  "draft": %@, "promoted": %@, "comments_disabled": %@, "translations": [{"locale": "%@", "title": "%@", "body": "%@"}]}}',
-            labels,draft,promoted,comments_disabled,locale,title,body),
+          article_data = {"article": {
+            "label_names": label_names,
+            "draft": draft,
+            "promoted": promoted,
+            "comments_disabled": comments_disabled,
+            "translations": [{"locale": locale, "title": title, "body": body}]
+          }},
+          article = JSON.stringify(article_data);
           section = this.$('select.section').val();
-          console.log(section);
-          console.log(locale);
+          console.log(label_names);
+          // console.log(locale);
 
       if(!section) {
         services.notify("No section specified. Please choose a section before submitting.", "error");

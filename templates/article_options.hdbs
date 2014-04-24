@@ -1,6 +1,7 @@
 <ul class="category_list">
   <form>
   <li class="article_options">
+    <label>Section</label>
     <select id="section_select" class="section" name="select" required>
       <option value="">Choose a section... </option>
       {{#each categories}}
@@ -19,15 +20,18 @@
     </select>
   </li>
   <li class="article_options">
+    <label>Locale</label>
     <select id="locale_select" class="locale" required>
-      <option value="">Choose a locale... </option>
+      <!-- <option value="">Choose a locale... </option> -->
       {{#each locales}}
         <option class="locale" value="{{this}}">{{this}}</option>
       {{/each}}
     </select>
   </li>
   <li class="article_options">
-    <br>
+    <label>Labels</label>
+    <input type="text" class="labels span2" placeholder="e.g. label_one, label_two, etc" />
+    <br><br>
     Draft: <input type="checkbox" class="draft" name="draft" checked /> | 
     Promoted: <input type="checkbox" class="promoted" name="promoted" value="true" /> | 
     Disable Comments: <input type="checkbox" class="comments_disabled" name="comments_disabled" value="true" />

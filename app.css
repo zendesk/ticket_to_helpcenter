@@ -128,4 +128,9 @@ ul.show_article {
   }
 }
 
-
+div.show_article_body {
+  overflow:hidden;
+}
+input.labels {
+  width: 300px;
+}

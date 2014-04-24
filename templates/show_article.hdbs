@@ -1,8 +1,11 @@
+
 <ul class="show_article">
+  <div class="show_article_body well well-small">
   {{#each translations}}
     <li class="title"><h4>{{this.title}}</h4></li><br>
     <li class="body">{{{this.body}}}</li><br>
   {{/each}}
+  </div>
   <li class="labels">
 
   </li>
