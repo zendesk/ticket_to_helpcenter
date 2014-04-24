@@ -208,7 +208,7 @@
             "comments_disabled": comments_disabled,
             "translations": [{"locale": locale, "title": title, "body": body}]
           }},
-          article = JSON.stringify(article_data);
+          article = JSON.stringify(article_data),
           section = this.$('select.section').val();
           console.log(label_names);
           // console.log(locale);
