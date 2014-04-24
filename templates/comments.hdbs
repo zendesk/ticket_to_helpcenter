@@ -1,3 +1,4 @@
+<div class="well well-small">
 <ul class="comment_list">
   <h5>Comments: </h5>
   {{#each comments}}
@@ -6,3 +7,4 @@
     {{/if}}
   {{/each}}
 </ul>
+</div>
