@@ -30,6 +30,6 @@
   </li>
   <br>
   <li class="actions">
-    <a href="#" class="done btn btn-primary">Done</a>
+    <button class="done btn btn-primary">Done</button>
   </li>
 </ul>

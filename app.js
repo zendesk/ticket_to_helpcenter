@@ -60,7 +60,8 @@
         };
       }
     },
-    init: function() {
+    init: function(e) {
+      if (e) { e.preventDefault(); }
       this.switchTo('default', {});
     },
     fetchComments: function(data) {
@@ -147,9 +148,9 @@
           // console.log(category.sections);
         });
         //get and process locales into array of unique values
-        console.log(locales_all);
+        // console.log(locales_all);
         var locales = _.uniq(locales_all);
-        console.log(locales);
+        // console.log(locales);
 
         this.switchTo('article_options', {
           categories: categories,
@@ -157,7 +158,7 @@
         });
         
       });
-      console.log(e);
+      // console.log(e);
       if(e.currentTarget.id == "done_editing_modal") {
         this.title = this.$('input#modal_title').val();
         this.html = this.$('textarea#modal_content').val();
@@ -183,6 +184,9 @@
     // },
     onPostClick: function(e) {
       if (e) { e.preventDefault(); }
+
+
+
       var labels = '[]',
           draft = this.$('input.draft').prop("checked"),
           promoted = this.$('input.promoted').prop("checked"),
@@ -197,6 +201,17 @@
             '{"article": {"labels": %@,  "draft": %@, "promoted": %@, "comments_disabled": %@, "translations": [{"locale": "%@", "title": "%@", "body": "%@"}]}}',
             labels,draft,promoted,comments_disabled,locale,title,body),
           section = this.$('select.section').val();
+          console.log(section);
+          console.log(locale);
+
+      if(!section) {
+        services.notify("No section specified. Please choose a section before submitting.", "error");
+        return;
+      }
+      if(!locale) {
+        services.notify("No locale specified. Please choose a locale before submitting.", "error");
+        return;
+      }
       this.ajax('postArticle', article, section)
       .done(function(response){
         var postedArticle = response.article,

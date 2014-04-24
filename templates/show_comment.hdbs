@@ -9,7 +9,7 @@
   </li>
   <br>
   <li class="actions">
-     <button class="back_to_comments btn btn-small">Back</button> | <button class="btn btn-small" id="modal_toggle">Open editor</button> | <button class="done_editing btn btn-primary btn-small" id="done_editing_sidebar">Next...</button>
+     <button class="back_to_comments btn btn-small">Back</button> | <button class="btn btn-small" id="modal_toggle">Open editor</button> | <button class="done_editing btn btn-primary" id="done_editing_sidebar">Next...</button>
   </li>
 </ul>
 
@@ -32,8 +32,8 @@
     </ul>
   </div>
   <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-    <button class="btn" id="close_button" data-dismiss="modal" aria-hidden="true">Close</button>
-    <button class="done_editing btn btn-primary btn-small" id="done_editing_modal" data-dismiss="modal">Next...</button>
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close & Cancel</button>
+    <button class="btn" id="close_button" data-dismiss="modal" aria-hidden="true">Close & Save</button>
+    <button class="done_editing btn btn-primary" id="done_editing_modal" data-dismiss="modal">Next...</button>
   </div>
 </div>
