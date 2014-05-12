@@ -131,8 +131,6 @@
               return obj.id == id;
             });
             section.translations.push(translation);
-            console.log(section.translations);
-            console.log(translation.locale);
             locales_all.push(translation.locale);
 
             
@@ -155,7 +153,6 @@
         ///  api/v2/help_center/articles/labels.json
         
       });
-      // console.log(e);
       if(e.currentTarget.id == "done_editing_modal") {
         this.title = this.$('input#modal_title').val();
         this.html = this.$('textarea#modal_content').val();
@@ -163,12 +160,6 @@
         this.title = this.$('input.title').val();
         this.html = this.$('textarea.show_comment').val();
       }
-    },
-    onSectionSelected: function(e) {
-      //this isn't getting called yet
-      // console.log("clicked an option");
-      this.$(".select_section").disabled = false;
-      this.$(".select_section").removeClass("disabled");
     },
     // onOpenEditorClick: function(e) {
     //   if (e) { e.preventDefault(); }
@@ -203,7 +194,6 @@
           }},
           article = JSON.stringify(article_data),
           section = this.$('select.section').val();
-          console.log(label_names);
 
       if(!section) {
         services.notify("No section specified. Please choose a section before submitting.", "error");
