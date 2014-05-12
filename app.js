@@ -14,7 +14,6 @@
       'getSections.fail':'getSectionsFail',
       'click #close_button':'copyModalContents',
       'click .done_editing':'onDoneEditingClick',
-      'change #section_select':'onSectionSelected',
       'click .select_section':'onPostClick',
       'postArticle.fail':'postArticleFail',
       'click .open_editor':'onOpenEditorClick',
