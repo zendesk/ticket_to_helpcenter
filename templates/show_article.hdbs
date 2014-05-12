@@ -1,15 +1,13 @@
 
 <ul class="show_article">
   <div class="show_article_body well well-small">
-  {{#each translations}}
-    <li class="title"><h4>{{this.title}}</h4></li><br>
-    <li class="body">{{{this.body}}}</li><br>
-  {{/each}}
+    <li class="title"><h4>{{article.title}}</h4></li><br>
+    <li class="labels">
+      {{#each article.label_names}}
+        <span class="label">{{this}}</span>
+      {{/each}}
+    </li>
   </div>
-  <li class="labels">
-
-  </li>
-  <br>
   <li class="properties">
     {{#if article.draft}}
       <div class="property" id="draft">
@@ -31,6 +29,7 @@
   <li class="article_links">
     <a href="{{article.html_url}}" class="btn btn-small" target="blank">View</a> | <a href="{{article.edit_url}}" class="btn btn-small" target="blank">Edit</a>
   </li>
+
   <br>
   <li class="actions">
     <button class="done btn btn-primary">Done</button>

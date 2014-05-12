@@ -82,7 +82,6 @@
           users = data.users;
       _.each(comments, function(comment) {
         comment.created_at_local = new Date(comment.created_at).toLocaleString();
-        // console.log(comment.created_at_local);
       });
       this.switchTo('comments', {
         comments: comments,
@@ -92,7 +91,6 @@
     onCommentClick: function(e) {
       if (e) { e.preventDefault(); }
       //get available sections, and when that finishes switch to the show_comment template with the comment and sections
-      // console.log(e.currentTarget.children[1]);
       var id = e.currentTarget.children[1].id,
           innerHtml = e.currentTarget.children[1].innerHTML,
           comment = innerHtml,
@@ -123,7 +121,6 @@
               return obj.id == id;
             });
             category.translations.push(translation);
-            // console.log("Category translations: " + translation.title);
           });
         });
         _.each(sections, function(section) {
@@ -145,13 +142,9 @@
             return obj.id == section.category_id;
           });
           category.sections.push(section);
-          // console.log(category.sections);
         });
         //get and process locales into array of unique values
-        // console.log(locales_all);
         var locales = _.uniq(locales_all);
-        // console.log(locales);
-
         this.switchTo('article_options', {
           categories: categories,
           locales: locales
@@ -195,7 +188,7 @@
           draft = this.$('input.draft').prop("checked"),
           promoted = this.$('input.promoted').prop("checked"),
           comments_disabled = this.$('input.comments_disabled').prop("checked"),
-          locale = this.$('select.locale').val(), //or a setting for the default locale
+          locale = this.$('select.locale').val(),
           ticket_id = this.ticket().id(),
           default_title = helpers.fmt('From ticket #%@ via Ticket to Help Center App', ticket_id),
           title = (this.title || default_title),
@@ -211,7 +204,6 @@
           article = JSON.stringify(article_data),
           section = this.$('select.section').val();
           console.log(label_names);
-          // console.log(locale);
 
       if(!section) {
         services.notify("No section specified. Please choose a section before submitting.", "error");
@@ -223,16 +215,12 @@
       }
       this.ajax('postArticle', article, section)
       .done(function(response){
-        var postedArticle = response.article,
-            translations = response.translations;
-        // console.log("Base URL: " + postedArticle.html_url);
+        var postedArticle = response.article;
         postedArticle.admin_url = postedArticle.html_url.replace(/hc\/(.*?)\//gi, "hc/admin/");
         postedArticle.edit_url = postedArticle.admin_url + helpers.fmt('/edit?translation_locale=%@', locale);
-        // console.log("Admin URL: " + postedArticle.admin_url);
         services.notify(helpers.fmt("Success! Your article has been posted to Help Center. Click the <a href='%@' target='blank'>edit link</a> to make changes.",postedArticle.edit_url));
         this.switchTo('show_article', {
-          article: postedArticle,
-          translations: translations
+          article: postedArticle
         });
       });
     },
