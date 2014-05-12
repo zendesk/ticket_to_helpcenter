@@ -37,7 +37,7 @@
     Promoted: <input type="checkbox" class="promoted" name="promoted" value="true" /> | 
     Disable Comments: <input type="checkbox" class="comments_disabled" name="comments_disabled" value="true" />
   </li>
-  <li class="actions">
+  <li class="actions pull-right">
     <button type="button" class="back_to_comments btn btn-small">Cancel</button> | 
     <input type="submit" class="select_section btn btn-primary" value="Post to Section">
   </li>

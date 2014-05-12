@@ -37,9 +37,6 @@ ul {
   li.article_options {
     margin-bottom:20px;
   }
-  li.actions {
-    text-align: right;
-  }
 }
 ul.comment_list {
   border-bottom: 1px solid LightSlateGray;
@@ -133,4 +130,7 @@ div.show_article_body {
 }
 input.labels {
   width: 300px;
+}
+li.labels {
+  text-align: center;
 }

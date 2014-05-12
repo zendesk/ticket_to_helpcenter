@@ -1,14 +1,14 @@
 
 <ul class="show_article">
+  
   <div class="show_article_body well well-small">
     <li class="title"><h4>{{article.title}}</h4></li><br>
     <li class="labels">
       {{#each article.label_names}}
         <span class="label">{{this}}</span>
       {{/each}}
-    </li>
-  </div>
-  <li class="properties">
+    </li><br>
+    <li class="properties">
     {{#if article.draft}}
       <div class="property" id="draft">
         <i class="icon-check"></i> Draft
@@ -21,17 +21,15 @@
     {{/if}} 
     {{#if article.comments_disabled}} 
       <div class="property" id="comments_disabled">
-        <i class="icon-check"></i> Comments Disabled
+        <i class="icon-check"></i> No Comments
       </div>
     {{/if}}
   </li>
-  <br>
+  </div>
   <li class="article_links">
     <a href="{{article.html_url}}" class="btn btn-small" target="blank">View</a> | <a href="{{article.edit_url}}" class="btn btn-small" target="blank">Edit</a>
   </li>
-
-  <br>
-  <li class="actions">
-    <button class="done btn btn-primary">Done</button>
+  <li>
+    <button class="done btn btn-primary pull-right">Done</button>
   </li>
 </ul>

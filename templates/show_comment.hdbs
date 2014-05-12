@@ -8,7 +8,7 @@
     <textarea class="show_comment" contenteditable="true">{{comment}}</textarea>
   </li>
   <br>
-  <li class="actions">
+  <li class="actions pull-right">
      <button class="back_to_comments btn btn-small">Back</button> | <button class="btn btn-small" id="modal_toggle">Open editor</button> | <button class="done_editing btn btn-primary" id="done_editing_sidebar">Next...</button>
   </li>
 </ul>
