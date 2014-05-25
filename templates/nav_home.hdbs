@@ -1,0 +1,22 @@
+<div class="app_frame">
+  <ul class="nav nav-tabs">
+    <li class="tab" id="comments">
+      <a href="#">Comments</a>
+    </li>
+    <li class="active tab" id="questions">
+      <a href="#">Questions</a>
+    </li>
+    <li class="tab" id="answers">
+      <a href="#">Answers</a>
+    </li>
+    <li class="tab" id="votes">
+      <a href="#">Votes</a>
+    </li>
+    <li class="tab" id="subscriptions">
+      <a href="#">Subscriptions</a>
+    </li>
+  </ul>
+  <div class="tab_content">
+    {{spinner "dotted"}}
+  </div>
+</div>

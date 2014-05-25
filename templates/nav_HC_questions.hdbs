@@ -1,0 +1,171 @@
+<div class="highlights"></div>
+<div class="filters">
+  <form class="form-inline">
+    <fieldset>
+      <legend>Filters</legend>
+      Answered?
+        <label class="checkbox"> 
+          <input class="answered_yes inline" type="checkbox"{{#if answeredYes}} checked{{/if}}> Yes
+        </label>
+        <label class="checkbox"> 
+          <input class="answered_no inline" type="checkbox"{{#if answeredNo}} checked{{/if}}> No
+        </label>
+      &nbsp;&nbsp;&nbsp;
+      {{!-- Note: there is only support for one community at the moment, bring this back when multiple communities are available
+      <label>Communities</label>
+      {{#if singleCommunity}}
+        <select>
+          {{#each communities}}
+            <option value="{{id}}" selected disabled>Name: {{name}} | Visibility: {{visibility}}</option>
+          {{/each}}
+        </select>
+      {{else}}
+        <select>
+          <option value="all" selected>All</option>
+          {{#each communities}}
+            <option value="{{id}}"{{#if ../singleCommunity}} selected disabled{{/if}}>Name: {{name}} | Visibility: {{visibility}}</option>
+          {{/each}}
+        </select>
+      {{/if}} 
+      --}}
+
+      <button class="btn btn-primary pull-right get_questions">Get Questions</button>
+
+
+    </fieldset>
+    
+  </form>
+</div> 
+{{!-- end filters --}}
+<br>
+<div class="questions_table">
+  <table class="table table-bordered">
+    <thead>
+      <tr class="table_header">
+        <th>Title</th>
+        <th>Author</th>
+        <th>Answer</th>
+        <th>Community</th>
+        <th>Vote Score</th>
+        <th># Votes</th>
+        <th># Answers</th>
+        <th># Followers</th>
+        <th>Topics</th>
+        <th>Created</th>
+        <th>Updated</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each questions}}
+      <tr class="question imploded" id="{{id}}">
+        <td class="title">
+          {{title}}
+        </td>
+        <td class="author">
+          {{author_id}}
+        </td>
+        <td class="accepted_answer">
+          {{#if accepted_answer_id}}
+            <a href="{{html_url}}#answer-{{accepted_answer_id}}" target="blank">
+              <i class="icon-ok" rel="tooltip" title="Answer Accepted"></i>
+            </a>
+          {{else}}
+            <i class="icon-remove" rel="tooltip" title="No Accepted Answer"></i>
+          {{/if}}
+        </td> 
+        {{!-- ^add logic for conditional and to make this a URL? --}}
+        <td class="community">
+          {{community_id}}
+        </td>
+        <td class="vote_sum">
+          {{vote_sum}}
+        </td>
+        <td class="vote_count">
+          {{vote_count}}
+        </td>
+        <td class="answer_count">
+          {{answer_count}}
+        </td>
+        <td class="follower_count">
+          {{follower_count}}
+        </td>
+        <td class="topics">
+          {{#each topic_ids}}
+            {{this}}{{#unless @last}}, {{/unless}}
+          {{/each}}
+        </td>
+        <td class="created">
+          {{created_at}}
+        </td>
+        <td class="updated">
+          {{updated_at}}
+        </td>
+        <td class="link">
+          <a href="{{html_url}}" target="blank"><i class="icon-info-sign"></i></a>
+        </td>
+      </tr>
+      <tr class="question exploded hidden {{id}}">
+        {{!-- build a cell that spans the whole row and gives more detailed info, only to be called as needed --}}
+        <td class="mega-cell" colspan="13">
+          <div class="question zoom_in">
+            <ul>
+              <li>
+                <h4>{{title}} <small>by {{author_id}} on {{created_at}}</small></h4>
+              </li>
+              <li class="pull-left inline_item">
+                <b>ID:</b> {{id}}&nbsp;
+              </li>
+              <li class="pull-left inline_item">
+                <b>Community:</b> {{community_id}}&nbsp;
+              </li>
+              <li class="pull-left inline_item topics">
+                <b>Topics: </b>{{#each topic_ids}}
+                  {{this}}{{#unless @last}}, {{/unless}}
+                {{/each}}&nbsp;
+              </li>
+              <li class="pull-left inline_item">
+                <b>Created: </b>{{created_at}}&nbsp;
+              </li>
+              <li class="pull-left inline_item">
+                <b>Updated: </b>{{updated_at}}&nbsp;
+              </li><br>
+              <li class="pull-left inline_item">
+                <b>Accepted Answer: </b>
+                {{#if accepted_answer_id}}
+                  <a href="{{html_url}}#answer-{{accepted_answer_id}}" target="blank">
+                    <i class="icon-ok" rel="tooltip" title="Answer Accepted"></i>
+                  </a>
+                {{else}}
+                  <i class="icon-remove" rel="tooltip" title="No Accepted Answer"></i>
+                {{/if}}&nbsp;
+              </li>
+              <li class="pull-left inline_item">
+                <b>Vote Score: </b>{{vote_sum}}&nbsp;
+              </li>
+              <li class="pull-left inline_item">
+                <b># Votes: </b>{{vote_count}}&nbsp;
+              </li>
+              <li class="pull-left inline_item">
+                <b># Answers: </b>{{answer_count}}&nbsp;
+              </li>
+              <li class="pull-left inline_item">
+                <b># Followers: </b>{{follower_count}}&nbsp;
+              </li>
+              <li class="pull-left inline_item">
+                <a href="{{html_url}}" target="blank"><i class="icon-info-sign"></i></a>
+              </li><br><br>
+              <li>
+                <h5>Details</h5>
+                {{details}}
+              </li>
+            </ul>
+          </div>
+        </td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+</div>
+
