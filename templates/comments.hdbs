@@ -1,9 +1,16 @@
+
 <div class="well well-small">
 <ul class="comment_list">
   <h5>Comments: </h5>
   {{#each comments}}
-    {{#if public}}
-      <li class="comment" id="{{id}}"><span class="time">{{created_at_local}}</span> <span class="comment">{{{html_body}}}</span></li>
+    {{#if ../no_html}}
+      <li class="comment to_comment" id="{{id}}"><span class="time">{{created_at_local}}</span> <br>
+        <span class="comment">{{body}}</span>
+      </li>
+    {{else}}
+      <li class="comment to_article" id="{{id}}"><span class="time">{{created_at_local}}</span> 
+        <span class="comment">{{{html_body}}}</span>
+      </li>
     {{/if}}
   {{/each}}
 </ul>

@@ -2,7 +2,7 @@
 <ul class="show_article">
   
   <div class="show_article_body well well-small">
-    <li class="title"><h4>{{article.title}}</h4></li><br>
+    <li class="title"><h4>Title: {{article.title}}</h4></li><br>
     <li class="labels">
       {{#each article.label_names}}
         <span class="label">{{this}}</span>

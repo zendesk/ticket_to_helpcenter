@@ -1,8 +1,8 @@
 <div class="highlights"></div>
 <div class="filters">
   <form class="form-inline">
+    <h3 class="muted">Filters {{!-- <i class="icon-filter"></i> --}}</h3>
     <fieldset>
-      <legend>Filters</legend>
       Answered?
         <label class="checkbox"> 
           <input class="answered_yes inline" type="checkbox"{{#if answeredYes}} checked{{/if}}> Yes
@@ -10,6 +10,7 @@
         <label class="checkbox"> 
           <input class="answered_no inline" type="checkbox"{{#if answeredNo}} checked{{/if}}> No
         </label>
+    
       &nbsp;&nbsp;&nbsp;
       {{!-- Note: there is only support for one community at the moment, bring this back when multiple communities are available
       <label>Communities</label>
@@ -30,9 +31,9 @@
       --}}
 
       <button class="btn btn-primary pull-right get_questions">Get Questions</button>
-
-
     </fieldset>
+
+    
     
   </form>
 </div> 
@@ -47,9 +48,9 @@
         <th>Answer</th>
         <th>Community</th>
         <th>Vote Score</th>
-        <th># Votes</th>
-        <th># Answers</th>
-        <th># Followers</th>
+        <th>Votes</th>
+        <th>Answers</th>
+        <th>Followers</th>
         <th>Topics</th>
         <th>Created</th>
         <th>Updated</th>
@@ -63,7 +64,7 @@
           {{title}}
         </td>
         <td class="author">
-          {{author_id}}
+          <a href="/agent/#/users/{{author.id}}" target="blank">{{author.name}}</a>
         </td>
         <td class="accepted_answer">
           {{#if accepted_answer_id}}
@@ -76,23 +77,25 @@
         </td> 
         {{!-- ^add logic for conditional and to make this a URL? --}}
         <td class="community">
-          {{community_id}}
+          <a href="/hc/communities/{{community.name}}/questions" target="blank">{{community.name}}</a>
         </td>
         <td class="vote_sum">
-          {{vote_sum}}
+          <span class="badge">{{vote_sum}}</span>
         </td>
         <td class="vote_count">
-          {{vote_count}}
+          <span class="badge">{{vote_count}}</span>
         </td>
         <td class="answer_count">
-          {{answer_count}}
+          <span class="badge">{{answer_count}}</span>
         </td>
         <td class="follower_count">
-          {{follower_count}}
+          <span class="badge">{{follower_count}}</span>
         </td>
         <td class="topics">
           {{#each topic_ids}}
-            {{this}}{{#unless @last}}, {{/unless}}
+            <a href="/hc/communities/public/topics/{{this}}" target="blank" rel="tooltip" title="Click to open topic">
+              <span class="label">{{this}}</span>
+            </a>{{#unless @last}}, {{/unless}}
           {{/each}}
         </td>
         <td class="created">
@@ -102,7 +105,7 @@
           {{updated_at}}
         </td>
         <td class="link">
-          <a href="{{html_url}}" target="blank"><i class="icon-info-sign"></i></a>
+          <a href="{{html_url}}" target="blank"><i class="icon-info-sign" rel="tooltip-left" title="Click to open question"></i></a>
         </td>
       </tr>
       <tr class="question exploded hidden {{id}}">
@@ -111,25 +114,33 @@
           <div class="question zoom_in">
             <ul>
               <li>
-                <h4>{{title}} <small>by {{author_id}} on {{created_at}}</small></h4>
-              </li>
+                <h4>{{title}} 
+                  <small>by <a href="/agent/#/users/{{author.id}}" target="blank">{{author.name}}</a> 
+                    on {{created_at}}
+                  </small> 
+                  &nbsp;&nbsp;<a href="{{html_url}}" target="blank"><i class="icon-info-sign" rel="tooltip" title="Click to open question"></i></a></h4>
+              </li><br>
+                
               <li class="pull-left inline_item">
                 <b>ID:</b> {{id}}&nbsp;
               </li>
               <li class="pull-left inline_item">
-                <b>Community:</b> {{community_id}}&nbsp;
+                <b>Community:</b> <a href="/hc/communities/{{community.name}}/questions" target="blank">{{community.name}}</a>&nbsp;
               </li>
               <li class="pull-left inline_item topics">
                 <b>Topics: </b>{{#each topic_ids}}
-                  {{this}}{{#unless @last}}, {{/unless}}
+                  <a href="/hc/communities/public/topics/{{this}}" target="blank" rel="tooltip" title="Click to open topic">
+                    <span class="label">{{this}}</span></a>{{#unless @last}}, {{/unless}}
                 {{/each}}&nbsp;
               </li>
+              <br><br>
               <li class="pull-left inline_item">
                 <b>Created: </b>{{created_at}}&nbsp;
               </li>
               <li class="pull-left inline_item">
                 <b>Updated: </b>{{updated_at}}&nbsp;
-              </li><br>
+              </li>
+              <br><br>
               <li class="pull-left inline_item">
                 <b>Accepted Answer: </b>
                 {{#if accepted_answer_id}}
@@ -141,20 +152,18 @@
                 {{/if}}&nbsp;
               </li>
               <li class="pull-left inline_item">
-                <b>Vote Score: </b>{{vote_sum}}&nbsp;
+                <b>Vote Score: </b><span class="badge">{{vote_sum}}</span>&nbsp;
               </li>
               <li class="pull-left inline_item">
-                <b># Votes: </b>{{vote_count}}&nbsp;
+                <b>Votes: </b><span class="badge">{{vote_count}}</span>&nbsp;
               </li>
               <li class="pull-left inline_item">
-                <b># Answers: </b>{{answer_count}}&nbsp;
+                <b>Answers: </b><span class="badge">{{answer_count}}</span>&nbsp;
               </li>
               <li class="pull-left inline_item">
-                <b># Followers: </b>{{follower_count}}&nbsp;
+                <b>Followers: </b><span class="badge">{{follower_count}}</span>&nbsp;
               </li>
-              <li class="pull-left inline_item">
-                <a href="{{html_url}}" target="blank"><i class="icon-info-sign"></i></a>
-              </li><br><br>
+              <br><br>
               <li>
                 <h5>Details</h5>
                 {{details}}
@@ -166,6 +175,9 @@
       {{/each}}
     </tbody>
   </table>
+  <a download="help_center_questions.csv" href="data:application/octet-stream,ID%2CTitle%2CAuthor%2CAnswer%2CCommunity%2CVote%20Score%2CVote%20Count%2CAnswer%20Count%2CFollower%20Count%2CCreated%2CUpdated%2CDetails%0A{{#encodedQuestions}}#{{id}}%2C{{title}}%2C{{author}}%2C{{#if accepted_answer_id}}{{accepted_answer_id}}{{else}}-{{/if}}%2C{{community}}%2C{{vote_sum}}%2C{{vote_count}}%2C{{answer_count}}%2C{{follower_count}}%2C{{created_at}}%2C{{updated_at}}%2C%22{{details}}%22%0A{{/encodedQuestions}}" class="btn pull-right">
+    <i class="icon-download"></i> Download CSV
+  </a><br><br>
 
 </div>
 

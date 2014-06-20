@@ -55,7 +55,7 @@ ul.show_comment {
   }
 
 }
-div#modal {
+div#comment_modal, div#article_modal, div#modal {
   width: 80%;
   height: 530px;
   position: fixed;
@@ -141,6 +141,9 @@ li.labels {
 
 td.link, td.accepted_answer, td.vote_sum, td.vote_count, td.answer_count, td.follower_count {
   text-align: center;
+}
+tr.imploded {
+  cursor: pointer;
 }
 .selected_to_explode td {
   background-color: #c9da99;
