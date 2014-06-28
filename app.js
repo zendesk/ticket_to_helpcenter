@@ -192,27 +192,11 @@
             locales_all = [];
         _.each(categories, function(category) {
           category.sections = [];
-          //add category titles to categories
-          // category.translations = [];
-          // _.each(category.translation_ids, function(id) {
-          //   var translation = _.find(translations, function(obj) {
-          //     return obj.id == id;
-          //   });
-          //   category.translations.push(translation);
-          // });
         });
         _.each(sections, function(section) {
           //add translation titles to sections
-          // section.translations = [];
           _.each(section.translations, function(translation) {
-            // var translation = _.find(translations, function(obj) {
-            //   return obj.id == id;
-            // });
-            // section.translations.push(translation);
-
             locales_all.push(translation.locale);
-
-            
           });
           //add sections to categories
           var category = _.find(categories, function(obj) {
@@ -221,16 +205,15 @@
           category.sections.push(section);
         });
         //get and process locales into array of unique values
-        var locales = _.uniq(locales_all);
+        var locales = _.uniq(locales_all),
+          force_draft = this.setting('force_draft');
         this.switchTo('article_options', {
           categories: categories,
-          locales: locales
+          locales: locales,
+          force_draft: force_draft
         });
-
-        //also get the available labels and then call jquery UI's autocomplete (or similar)
-
+        //TODO also get the available labels and then call jquery UI's autocomplete (or similar)
         //  /api/v2/help_center/articles/labels.json
-        
       });
       if(e.currentTarget.id == "done_editing_modal") {
         this.title = this.$('input#modal_title').val();
@@ -244,8 +227,6 @@
 
       //TODO change this so it works for comments rather than articles
       if (e) { e.preventDefault(); }
-      // services.notify("Posting Comments isn't quite finished yet. Sorry for the trouble.", 'error');
-      // return;
       this.ajax('getHCarticles')
       .done(function(response){
         var articles = response.articles,
@@ -279,13 +260,11 @@
             section.locales.push(translation.locale);
           });
         });
-        console.log(sections);
         this.switchTo('comment_options', {
           sections: sections
         });
 
-        //also get the available labels and then call jquery UI's autocomplete (or similar)
-
+        //TODO also get the available labels and then call jquery UI's autocomplete (or similar)
         //  /api/v2/help_center/articles/labels.json
         
       });

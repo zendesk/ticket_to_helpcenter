@@ -33,7 +33,7 @@
     <label>Labels</label>
     <input type="text" class="labels span2" placeholder="e.g. label_one, label_two, etc" />
     <br><br>
-    Draft: <input type="checkbox" class="draft" name="draft" checked /> | 
+    Draft: <input type="checkbox" class="draft" name="draft" checked {{#if force_draft}}disabled{{/if}} /> | 
     Promoted: <input type="checkbox" class="promoted" name="promoted" value="true" /> | 
     Disable Comments: <input type="checkbox" class="comments_disabled" name="comments_disabled" value="true" />
   </li>

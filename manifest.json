@@ -13,6 +13,10 @@
     {
       "name":"restrict_to_moderators",
       "type":"checkbox"
+    },
+    {
+      "name":"force_draft",
+      "type":"checkbox"
     }
   ]
 }
