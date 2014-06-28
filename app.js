@@ -305,7 +305,7 @@
           // "draft": draft,
           "promoted": promoted,
           "comments_disabled": comments_disabled,
-          "translations": [{"locale": locale, "title": title, "body": body, "draft": true}]
+          "translations": [{"locale": locale, "title": title, "body": body, "draft": draft}]
         }},
         article = JSON.stringify(article_data),
         section = this.$('select.section').val();
