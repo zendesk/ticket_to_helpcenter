@@ -47,9 +47,6 @@ Pull requests are welcome, particularly to help refactor to improve performance,
 
 
 ## Screenshot(s):
-Default state.
-![Imgur](http://i.imgur.com/Ugub0su.png)
-
 
 List public comments.
 Comments expand slightly and get 10% alpha Zendesk green when hovered-over.
