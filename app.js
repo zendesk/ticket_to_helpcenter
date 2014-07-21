@@ -12,6 +12,7 @@
         // this.postType = 'comment';
         // this.ajax('getUser');
       },
+      'app.created':'segmentIdentify',
       'getUser.done':'fetchComments',
       'getUser.fail':'getUserFail',
       'getComments.done':'renderComments',
@@ -68,11 +69,9 @@
           type: 'POST',
           dataType: 'JSON',
           contentType: 'application/JSON',
-          proxy_v2: true,
           data: article
         };
       },
-
       // nav bar requests
       getHCquestions: function (answered, next_page) {
         var accepted = '';
@@ -108,8 +107,30 @@
             type: 'GET'
           };
         }
-        
-      }
+      },
+      // Segment requests
+      identify: function(user) {
+        var segmentWriteKey = btoa('b08tpgubau');
+        return {
+          url: 'https://api.segment.io/v1/identify',
+          type: 'POST',
+          dataType: 'JSON',
+          contentType: 'application/JSON',
+          data: user,
+          headers: {'Authorization': 'Basic ' + segmentWriteKey}
+        };
+      },
+      track: function(event) {
+        var segmentWriteKey = btoa('b08tpgubau');
+        return {
+          url: 'https://api.segment.io/v1/track',
+          type: 'POST',
+          dataType: 'JSON',
+          contentType: 'application/JSON',
+          data: event,
+          headers: {'Authorization': 'Basic ' + segmentWriteKey}
+        };
+      },
     },
     init: function(e) {
       if (e) { e.preventDefault(); }
@@ -119,7 +140,6 @@
     onPaneActivated: function(data) {
       if(data.firstLoad) {
         this.loadNavBar();
-
       }
     },
     fetchComments: function(data) {
@@ -611,6 +631,27 @@
     progressBar: function(percent) {
       var html = helpers.fmt('<div class="progress progress-success progress-striped"><div class="bar" style="width: %@%"></div></div>', percent);
       this.$('.tab_content').html(html);
+    },
+    segmentIdentify: function() {
+      var zenUser = this.currentUser(),
+        zenAccount = this.currentAccount(),
+        segmentId = helpers.fmt("%@+%@", zenAccount.subdomain(), zenUser.id());
+      var segmentUser = {
+        'userId': segmentId,
+        'traits': {
+          'email': zenUser.email(),
+          'id': zenUser.id(),
+          'subdomain': zenAccount.subdomain(),
+          'locale': zenUser.locale()
+        }
+      };
+      // ajax request
+      this.ajax('identify', JSON.stringify(segmentUser));
+      return segmentId;
+    },
+    segmentTrack: function(event) {
+
+
     }
 
   };
