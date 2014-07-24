@@ -16,7 +16,7 @@
         // this.postType = 'comment';
         // this.ajax('getUser');
         this.segmentIdentify();
-        this.segmentTrack('HC | Post Comment: Initiated');
+        this.segmentTrack('HC | Post Comment: initiated');
       },
 
       // 'click a.default':'',
