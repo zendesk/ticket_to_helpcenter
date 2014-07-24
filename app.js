@@ -3,20 +3,20 @@
     defaultState: 'default',
     segmentWriteKey: btoa('b08tpgubau'),
     events: {
+      'app.created':'requireModules',
       'click a.default':function(e) {
         if (e) { e.preventDefault(); }
         this.postType = 'article';
         this.ajax('getUser');
-        this.segmentIdentify();
-        // segment.io that ish
-        this.segmentTrack('HC | Post Article: initiated');
+        this.segment.identifyAndGroup();
+        this.segment.track('HC | Post Article: initiated');
       },
       'click a.post_comment':function(e) {
         if (e) { e.preventDefault(); }
         // this.postType = 'comment';
         // this.ajax('getUser');
-        this.segmentIdentify();
-        this.segmentTrack('HC | Post Comment: initiated');
+        this.segment.identifyAndGroup();
+        this.segment.track('HC | Post Comment: initiated');
       },
 
       // 'click a.default':'',
@@ -116,7 +116,7 @@
           };
         }
       },
-      // Segment requests
+      // segment requests
       identify: function(user) {
         return {
           url: 'https://api.segment.io/v1/identify',
@@ -128,7 +128,6 @@
         };
       },
       group: function(group) {
-        var segmentWriteKey = btoa('b08tpgubau');
         return {
           url: 'https://api.segment.io/v1/group',
           type: 'POST',
@@ -139,7 +138,6 @@
         };
       },
       track: function(event) {
-        var segmentWriteKey = btoa('b08tpgubau');
         return {
           url: 'https://api.segment.io/v1/track',
           type: 'POST',
@@ -149,6 +147,10 @@
           headers: {'Authorization': 'Basic ' + this.segmentWriteKey}
         };
       },
+    },
+    requireModules: function() {
+      var Segment = require('segment.js');
+      this.segment = new Segment(this);
     },
     init: function(e) {
       if (e) { e.preventDefault(); }
@@ -201,7 +203,7 @@
           comment: comment,
           ticket_id: ticket_id
       });
-      this.segmentTrack('HC | Post Article: comment selected');
+      this.segment.track('HC | Post Article: comment selected');
     },
     onCommentToCommentClick: function(e) {
       if (e) { e.preventDefault(); }
@@ -260,7 +262,7 @@
         this.title = this.$('input.title').val();
         this.html = this.$('textarea.show_comment').val();
       }
-      this.segmentTrack('HC | Post Article: show article options');
+      this.segment.track('HC | Post Article: show article options');
     },
     onDoneEditingCommentClick: function (e) {
       //TODO change this so it works for comments rather than articles
@@ -365,41 +367,29 @@
           article: postedArticle
         });
       });
-      // segment.io that ish
-      // this.segmentTrack({
-      //   'event':'HC | Article Posted to Help Center',
-      //   'properties':{
-      //     'label_names': label_names,
-      //     'draft': draft,
-      //     'promoted': promoted,
-      //     'comments_disabled': comments_disabled,
-      //     'locale': locale,
-      //     'title': title
-      //   }
-      // });
-      this.segmentTrack('HC | Post Article: article posted',{'label_names': label_names,'draft': draft,'promoted': promoted,'comments_disabled': comments_disabled,'locale': locale,'title': title});
+      this.segment.track('HC | Post Article: article posted',{'label_names': label_names,'draft': draft,'promoted': promoted,'comments_disabled': comments_disabled,'locale': locale,'title': title});
     },
     showModal: function() {
       this.$("input#modal_title").val(this.$("input.title").val());
       this.$("textarea#modal_content").val(this.$("textarea.show_comment").val());
       this.$('#modal').modal('show');
-      this.segmentTrack('HC | show modal');
+      this.segment.track('HC | show modal');
     },
     getUserFail: function(data) {
       services.notify('Failed to get the current user for permission check. Please try reloading the app.', 'error');
-      this.segmentTrack('HC | Error: get user failed', {'error':data});
+      this.segment.track('HC | Error: get user failed', {'error':data});
     },
     getCommentsFail: function(data) {
       services.notify('Failed to get the comments for the current ticket. Please try reloading the app.', 'error');
-      this.segmentTrack('HC | Error: get comments failed', {'error':data});
+      this.segment.track('HC | Error: get comments failed', {'error':data});
     },
     getSectionsFail: function(data) {
       services.notify('Failed to get the available sections for the Help Center. Please try reloading the app.', 'error');
-      this.segmentTrack('HC | Error: get sections failed', {'error':data});
+      this.segment.track('HC | Error: get sections failed', {'error':data});
     },
     postArticleFail: function(data) {
       services.notify('Failed to post to Help Center. Please check that you have permission to create an article in the chosen section and try reloading the app.', 'error');
-      this.segmentTrack('HC | Error: post article failed', {'error':data});
+      this.segment.track('HC | Error: post article failed', {'error':data});
     },
 
     // #### NAVBAR
@@ -664,53 +654,10 @@
     progressBar: function(percent) {
       var html = helpers.fmt('<div class="progress progress-success progress-striped"><div class="bar" style="width: %@%"></div></div>', percent);
       this.$('.tab_content').html(html);
-    },
+    }
 
     // segment.io functions
-    segmentId: function() {
-      return helpers.fmt("%@+%@", this.currentAccount().subdomain(), this.currentUser().id());
-    },
-    segmentIdentify: function() {
-      // generates the unique user ID, grabs select user info, and posts it to segment.io
-      var zenUser = this.currentUser(),
-      zenAccount = this.currentAccount(),
-      segmentId = this.segmentId(),
-      segmentUser = {
-        'userId': segmentId,
-        'traits': {
-          'name': zenUser.name(),
-          'email': zenUser.email(),
-          'id': zenUser.id(),
-          'subdomain': zenAccount.subdomain(),
-          'locale': zenUser.locale(),
-          'product': 'Help Center App'
-        }
-      },
-      segmentGroup = {
-        'userId': segmentId,
-        'groupId': zenAccount.subdomain(),
-        'traits': {
-          'zendeskPlan': zenAccount.planName()
-        }
-      };
-      // make the ajax requests
-      this.ajax('identify', JSON.stringify(segmentUser));
-      this.ajax('group', JSON.stringify(segmentGroup));
-    },
-    segmentTrack: function(name, properties) {
-      // pass in an event object with event and properties key-value pairs
-      // this function generates the unique user id (id+subdomain) and fires the POST request
-      if(!properties) {properties = {};}
-      properties.product = 'Help Center App';
-      var event = {
-        'userId': this.segmentId(),
-        'event': name,
-        'properties': properties
-      };
-      if(this.ticket()) {
-        event.ticket_id = this.ticket().id();
-      }
-      this.ajax('track', JSON.stringify(event));
-    }
+    // require
+    
   };
 }());
