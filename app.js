@@ -6,13 +6,26 @@
         if (e) { e.preventDefault(); }
         this.postType = 'article';
         this.ajax('getUser');
+        this.segmentIdentify();
+        // segment.io that ish
+        this.segmentTrack({
+          'event':'Help Center App | Initiated Post Article flow'
+        });
       },
       'click a.post_comment':function(e) {
         if (e) { e.preventDefault(); }
         // this.postType = 'comment';
         // this.ajax('getUser');
+        this.segmentIdentify();
+        this.segmentTrack({
+          'event':'Help Center App | Initiated Post Comment flow'
+        });
       },
+      // event tracking via segment
       'app.created':'segmentIdentify',
+
+      // 'click a.default':'',
+      // 'click a.post_comment':'',
       'getUser.done':'fetchComments',
       'getUser.fail':'getUserFail',
       'getComments.done':'renderComments',
@@ -31,9 +44,9 @@
       },
       'click #modal_toggle':'showModal',
       'click .done':'init',
+
       // nav bar events
       'pane.activated':'onPaneActivated',
-
       'click li.tab':'onTabClicked',
       'click .imploded':'toggleRow',
       'click button.get_questions':'getHCquestions'
@@ -117,6 +130,17 @@
           dataType: 'JSON',
           contentType: 'application/JSON',
           data: user,
+          headers: {'Authorization': 'Basic ' + segmentWriteKey}
+        };
+      },
+      group: function(group) {
+        var segmentWriteKey = btoa('b08tpgubau');
+        return {
+          url: 'https://api.segment.io/v1/group',
+          type: 'POST',
+          dataType: 'JSON',
+          contentType: 'application/JSON',
+          data: group,
           headers: {'Authorization': 'Basic ' + segmentWriteKey}
         };
       },
@@ -305,8 +329,6 @@
     // },
     onPostArticleClick: function(e) {
       if (e) { e.preventDefault(); }
-
-
       // gather field valudes
       var label_names = this.$('input.labels').val().split(/\W/),
         draft = this.$('input.draft').prop("checked"),
@@ -349,6 +371,18 @@
         this.switchTo('show_article', {
           article: postedArticle
         });
+      });
+      // segment.io that ish
+      this.segmentTrack({
+        'event':'Help Center App | Article Posted to Help Center',
+        'properties':{
+          'label_names': label_names,
+          'draft': draft,
+          'promoted': promoted,
+          'comments_disabled': comments_disabled,
+          'locale': locale,
+          'title': title
+        }
       });
     },
     showModal: function() {
@@ -632,27 +666,43 @@
       var html = helpers.fmt('<div class="progress progress-success progress-striped"><div class="bar" style="width: %@%"></div></div>', percent);
       this.$('.tab_content').html(html);
     },
+    // segment.io functions
+    segmentId: function() {
+      return helpers.fmt("%@+%@", this.currentAccount().subdomain(), this.currentUser().id());
+    },
     segmentIdentify: function() {
+      // generates the unique user ID, grabs select user info, and posts it to segment.io
       var zenUser = this.currentUser(),
-        zenAccount = this.currentAccount(),
-        segmentId = helpers.fmt("%@+%@", zenAccount.subdomain(), zenUser.id());
-      var segmentUser = {
+      zenAccount = this.currentAccount(),
+      segmentId = this.segmentId(),
+      segmentUser = {
         'userId': segmentId,
         'traits': {
+          'name': zenUser.name(),
           'email': zenUser.email(),
           'id': zenUser.id(),
           'subdomain': zenAccount.subdomain(),
-          'locale': zenUser.locale()
+          'locale': zenUser.locale(),
+          'product': 'Help Center App'
+        }
+      },
+      segmentGroup = {
+        'userId': segmentId,
+        'groupId': zenAccount.subdomain(),
+        'traits': {
+          'zendeskPlan': zenAccount.planName()
         }
       };
-      // ajax request
+      // make the ajax requests
       this.ajax('identify', JSON.stringify(segmentUser));
-      return segmentId;
+      this.ajax('group', JSON.stringify(segmentGroup));
     },
     segmentTrack: function(event) {
-
-
+      // pass in an event object with event and properties key-value pairs
+      // this function generates the unique user id (id+subdomain) and fires the POST request
+      event.userId = this.segmentId();
+      event.product = 'Help Center App';
+      this.ajax('track', JSON.stringify(event));
     }
-
   };
 }());
