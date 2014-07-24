@@ -17,9 +17,6 @@
         this.segment.identifyAndGroup();
         this.segment.track('HC | Post Comment: initiated');
       },
-
-      // 'click a.default':'',
-      // 'click a.post_comment':'',
       'getUser.done':'fetchComments',
       'getUser.fail':'getUserFail',
       'getComments.done':'renderComments',
