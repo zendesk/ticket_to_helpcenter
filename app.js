@@ -1,6 +1,7 @@
 (function() {
   return {
     defaultState: 'default',
+    segmentWriteKey: btoa('b08tpgubau'),
     events: {
       'click a.default':function(e) {
         if (e) { e.preventDefault(); }
@@ -8,21 +9,15 @@
         this.ajax('getUser');
         this.segmentIdentify();
         // segment.io that ish
-        this.segmentTrack({
-          'event':'Help Center App | Initiated Post Article flow'
-        });
+        this.segmentTrack('HC | Post Article: initiated');
       },
       'click a.post_comment':function(e) {
         if (e) { e.preventDefault(); }
         // this.postType = 'comment';
         // this.ajax('getUser');
         this.segmentIdentify();
-        this.segmentTrack({
-          'event':'Help Center App | Initiated Post Comment flow'
-        });
+        this.segmentTrack('HC | Post Comment: Initiated');
       },
-      // event tracking via segment
-      'app.created':'segmentIdentify',
 
       // 'click a.default':'',
       // 'click a.post_comment':'',
@@ -123,14 +118,13 @@
       },
       // Segment requests
       identify: function(user) {
-        var segmentWriteKey = btoa('b08tpgubau');
         return {
           url: 'https://api.segment.io/v1/identify',
           type: 'POST',
           dataType: 'JSON',
           contentType: 'application/JSON',
           data: user,
-          headers: {'Authorization': 'Basic ' + segmentWriteKey}
+          headers: {'Authorization': 'Basic ' + this.segmentWriteKey}
         };
       },
       group: function(group) {
@@ -141,7 +135,7 @@
           dataType: 'JSON',
           contentType: 'application/JSON',
           data: group,
-          headers: {'Authorization': 'Basic ' + segmentWriteKey}
+          headers: {'Authorization': 'Basic ' + this.segmentWriteKey}
         };
       },
       track: function(event) {
@@ -152,7 +146,7 @@
           dataType: 'JSON',
           contentType: 'application/JSON',
           data: event,
-          headers: {'Authorization': 'Basic ' + segmentWriteKey}
+          headers: {'Authorization': 'Basic ' + this.segmentWriteKey}
         };
       },
     },
@@ -189,7 +183,6 @@
       if (this.postType == 'comment') {
         no_html = true;
       }
-      console.log("No html? " + no_html);
       this.switchTo('comments', {
         comments: comments,
         users: users,
@@ -199,7 +192,7 @@
     onCommentClick: function(e) {
       if (e) { e.preventDefault(); }
       //switch to the edit_ticket_comment_to_article template with the comment and sections
-      console.log(e);
+      // console.log(e);
       var id = e.currentTarget.children[1].id,
           innerHtml = e.currentTarget.children[1].innerHTML,
           comment = innerHtml,
@@ -208,11 +201,12 @@
           comment: comment,
           ticket_id: ticket_id
       });
+      this.segmentTrack('HC | Post Article: comment selected');
     },
     onCommentToCommentClick: function(e) {
       if (e) { e.preventDefault(); }
       //switch to the edit_ticket_comment_to_comment template with the comment and sections
-      console.log(e);
+      // console.log(e);
       var id = e.currentTarget.children[2].id,
           innerHtml = e.currentTarget.children[2].innerHTML,
           comment = innerHtml,
@@ -266,9 +260,9 @@
         this.title = this.$('input.title').val();
         this.html = this.$('textarea.show_comment').val();
       }
+      this.segmentTrack('HC | Post Article: show article options');
     },
     onDoneEditingCommentClick: function (e) {
-
       //TODO change this so it works for comments rather than articles
       if (e) { e.preventDefault(); }
       this.ajax('getHCarticles')
@@ -309,8 +303,7 @@
         });
 
         //TODO also get the available labels and then call jquery UI's autocomplete (or similar)
-        //  /api/v2/help_center/articles/labels.json
-        
+        //  /api/v2/help_center/articles/labels.json  
       });
       if(e.currentTarget.id == "done_editing_modal") {
         this.html = this.$('textarea#modal_content').val();
@@ -373,37 +366,44 @@
         });
       });
       // segment.io that ish
-      this.segmentTrack({
-        'event':'Help Center App | Article Posted to Help Center',
-        'properties':{
-          'label_names': label_names,
-          'draft': draft,
-          'promoted': promoted,
-          'comments_disabled': comments_disabled,
-          'locale': locale,
-          'title': title
-        }
-      });
+      // this.segmentTrack({
+      //   'event':'HC | Article Posted to Help Center',
+      //   'properties':{
+      //     'label_names': label_names,
+      //     'draft': draft,
+      //     'promoted': promoted,
+      //     'comments_disabled': comments_disabled,
+      //     'locale': locale,
+      //     'title': title
+      //   }
+      // });
+      this.segmentTrack('HC | Post Article: article posted',{'label_names': label_names,'draft': draft,'promoted': promoted,'comments_disabled': comments_disabled,'locale': locale,'title': title});
     },
     showModal: function() {
       this.$("input#modal_title").val(this.$("input.title").val());
       this.$("textarea#modal_content").val(this.$("textarea.show_comment").val());
       this.$('#modal').modal('show');
+      this.segmentTrack('HC | show modal');
     },
     getUserFail: function(data) {
       services.notify('Failed to get the current user for permission check. Please try reloading the app.', 'error');
+      this.segmentTrack('HC | Error: get user failed', {'error':data});
     },
     getCommentsFail: function(data) {
       services.notify('Failed to get the comments for the current ticket. Please try reloading the app.', 'error');
+      this.segmentTrack('HC | Error: get comments failed', {'error':data});
     },
     getSectionsFail: function(data) {
       services.notify('Failed to get the available sections for the Help Center. Please try reloading the app.', 'error');
+      this.segmentTrack('HC | Error: get sections failed', {'error':data});
     },
     postArticleFail: function(data) {
       services.notify('Failed to post to Help Center. Please check that you have permission to create an article in the chosen section and try reloading the app.', 'error');
+      this.segmentTrack('HC | Error: post article failed', {'error':data});
     },
 
-    // #NAVBAR
+    // #### NAVBAR
+    // the navbar code is not running in the production version... yet.
 
     loadNavBar: function() {
       if (this.setting("restrict_to_moderators") === true) {
@@ -633,8 +633,7 @@
       this.$(explodedSelector).toggleClass("hidden");
     },
 
-
-    // Helpers
+    // #### Helpers
     paginate: function(a) {
       var results = [];
       var initialRequest = this.ajax(a.request, a.start, a.page);
@@ -666,6 +665,7 @@
       var html = helpers.fmt('<div class="progress progress-success progress-striped"><div class="bar" style="width: %@%"></div></div>', percent);
       this.$('.tab_content').html(html);
     },
+
     // segment.io functions
     segmentId: function() {
       return helpers.fmt("%@+%@", this.currentAccount().subdomain(), this.currentUser().id());
@@ -697,11 +697,19 @@
       this.ajax('identify', JSON.stringify(segmentUser));
       this.ajax('group', JSON.stringify(segmentGroup));
     },
-    segmentTrack: function(event) {
+    segmentTrack: function(name, properties) {
       // pass in an event object with event and properties key-value pairs
       // this function generates the unique user id (id+subdomain) and fires the POST request
-      event.userId = this.segmentId();
-      event.product = 'Help Center App';
+      if(!properties) {properties = {};}
+      properties.product = 'Help Center App';
+      var event = {
+        'userId': this.segmentId(),
+        'event': name,
+        'properties': properties
+      };
+      if(this.ticket()) {
+        event.ticket_id = this.ticket().id();
+      }
       this.ajax('track', JSON.stringify(event));
     }
   };
