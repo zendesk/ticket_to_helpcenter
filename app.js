@@ -1,9 +1,8 @@
 (function() {
   return {
     defaultState: 'default',
-    segmentWriteKey: btoa('b08tpgubau'),
+    // segmentRequests: require('segment/requests.js'),
     events: {
-      'app.created':'requireModules',
       'click a.default':function(e) {
         if (e) { e.preventDefault(); }
         this.postType = 'article';
@@ -44,9 +43,26 @@
       'pane.activated':'onPaneActivated',
       'click li.tab':'onTabClicked',
       'click .imploded':'toggleRow',
-      'click button.get_questions':'getHCquestions'
+      'click button.get_questions':'getHCquestions',
+
+      // include the segment module on app.created
+      'app.created':function() {
+        var Segment = require('segment/segment.js');
+        this.segment = new Segment(this);
+      },
     },
     requests: {
+      // segment requests
+      identify: function(user) {
+        return this.segment.identifyReq(user);
+      },
+      group: function(group) {
+        return this.segment.groupReq(group);
+      },
+      track: function(event) {
+        return this.segment.trackReq(event);
+      },
+      // end segment requests
       getUser: function() {
         return {
           url: '/api/v2/users/me.json',
@@ -115,42 +131,7 @@
             type: 'GET'
           };
         }
-      },
-      // segment requests
-      identify: function(user) {
-        return {
-          url: 'https://api.segment.io/v1/identify',
-          type: 'POST',
-          dataType: 'JSON',
-          contentType: 'application/JSON',
-          data: user,
-          headers: {'Authorization': 'Basic ' + this.segmentWriteKey}
-        };
-      },
-      group: function(group) {
-        return {
-          url: 'https://api.segment.io/v1/group',
-          type: 'POST',
-          dataType: 'JSON',
-          contentType: 'application/JSON',
-          data: group,
-          headers: {'Authorization': 'Basic ' + this.segmentWriteKey}
-        };
-      },
-      track: function(event) {
-        return {
-          url: 'https://api.segment.io/v1/track',
-          type: 'POST',
-          dataType: 'JSON',
-          contentType: 'application/JSON',
-          data: event,
-          headers: {'Authorization': 'Basic ' + this.segmentWriteKey}
-        };
-      },
-    },
-    requireModules: function() {
-      var Segment = require('segment.js');
-      this.segment = new Segment(this);
+      }
     },
     init: function(e) {
       if (e) { e.preventDefault(); }
@@ -655,9 +636,5 @@
       var html = helpers.fmt('<div class="progress progress-success progress-striped"><div class="bar" style="width: %@%"></div></div>', percent);
       this.$('.tab_content').html(html);
     }
-
-    // segment.io functions
-    // require
-    
   };
 }());
