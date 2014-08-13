@@ -1,7 +1,6 @@
 (function() {
   return {
     defaultState: 'default',
-    // segmentRequests: require('segment/requests.js'),
     events: {
       'click a.default':function(e) {
         if (e) { e.preventDefault(); }
@@ -35,12 +34,6 @@
       },
       'click #modal_toggle':'showModal',
       'click .done':'init',
-
-      // nav bar events
-      'pane.activated':'onPaneActivated',
-      'click li.tab':'onTabClicked',
-      'click .imploded':'toggleRow',
-      'click button.get_questions':'getHCquestions',
 
       // include the segment module on app.created
       'app.created':function() {
@@ -92,53 +85,11 @@
           contentType: 'application/JSON',
           data: article
         };
-      },
-      // nav bar requests
-      getHCquestions: function (answered, next_page) {
-        var accepted = '';
-        if (answered == 'yes') {
-          accepted = '&accepted=true';
-        } else if (answered == 'no') {
-          accepted = '&accepted=false';
-        }
-        if (next_page) {
-          return {
-            url: next_page + '&include=users,communities' + accepted,
-            type: 'GET',
-            success: function(response){this.gotHCQuestions(response, answered);}
-          };
-        } else {
-          return {
-            url: '/api/v2/help_center/questions.json?include=users,communities' + accepted, // add topics to sideload when implemented
-            type: 'GET',
-            success: function(response){this.gotHCQuestions(response, answered);}
-          };
-        }
-      },
-      getHCarticles: function (start) {
-        if (start) {
-          //if a start date (ms UTC) is passed...
-          return {
-            url: '/api/v2/help_center/incremental/articles.json?include=users,sections,translations&start_time=' + start,
-            type: 'GET'
-          };
-        } else {
-          return {
-            url: '/api/v2/help_center/articles.json?include=users,sections,translations',
-            type: 'GET'
-          };
-        }
       }
     },
     init: function(e) {
       if (e) { e.preventDefault(); }
       this.switchTo('default', {});
-    },
-    // load the navbar app if the pane is activated for the first time
-    onPaneActivated: function(data) {
-      if(data.firstLoad) {
-        this.loadNavBar();
-      }
     },
     fetchComments: function(data) {
       var currentUser = data.user;
@@ -291,15 +242,6 @@
         this.html = this.$('textarea.show_comment').val();
       }
     },
-    // onOpenEditorClick: function(e) {
-    //   if (e) { e.preventDefault(); }
-    //   var title = encodeURIComponent(this.$('input.title').val());
-    //   var body = encodeURIComponent(this.$('textarea.show_comment').text());
-    //   var url = helpers.fmt('https://joeshelpcenter.zendesk.com/hc/admin/articles/new?title=%@&body=%@',title,body);
-    //   this.switchTo('editor_link', {
-    //     url: url
-    //   });
-    // },
     onPostArticleClick: function(e) {
       if (e) { e.preventDefault(); }
       // gather field valudes
@@ -340,7 +282,7 @@
         var postedArticle = response.article;
         postedArticle.admin_url = postedArticle.html_url.replace(/hc\/(.*?)\//gi, "hc/admin/");
         postedArticle.edit_url = postedArticle.admin_url + helpers.fmt('/edit?translation_locale=%@', locale);
-        services.notify(helpers.fmt("Success! Your article has been posted to Help Center. Click the <a href='%@' target='blank'>edit link</a> to make changes.",postedArticle.edit_url));
+        services.notify(helpers.fmt("Success! Your outage has been posted to Help Center. Click the <a href='%@' target='blank'>edit link</a> to make changes.",postedArticle.edit_url));
         this.switchTo('show_article', {
           article: postedArticle
         });
@@ -368,237 +310,6 @@
     postArticleFail: function(data) {
       services.notify('Failed to post to Help Center. Please check that you have permission to create an article in the chosen section and try reloading the app.', 'error');
       this.segment.track('HC | Error: post article failed', {'error':data});
-    },
-
-    // #### NAVBAR
-    // the navbar code is not running in the production version... yet.
-
-    loadNavBar: function() {
-      if (this.setting("restrict_to_moderators") === true) {
-        var me = this.currentUser();
-        if (me.moderator !== true) {
-          services.notify('This app is restrcited to Moderators, and you are not one. Please check with an Admin about getting Moderator privileges.');
-          return;
-          // this.switchTo('nav_restricted')
-        }
-      }
-      //TODO load the user's last tab choice from local storage, then load and select that
-
-      this.switchTo('nav_home', {
-      });
-      this.$('div.app_frame').parents('.apps_nav_bar').css("padding", "0");
-      // currently defaulting to questions via the following code
-      this.getHCquestions();
-    },
-    onTabClicked: function(e) {
-      if(e) {e.preventDefault();}
-      var tab = e.currentTarget.id;
-      console.log("Tab: " + tab);
-
-      // select the clicked tab
-      var selector = '#' + tab;
-      this.$('li.tab').removeClass('active');
-      this.$(selector).addClass('active');
-      //this.progressBar('0');
-      this.$('.questions_table').html('<div class="spinner dotted"></div>');
-
-      // TODO: get the corresponding objects, the success of which should render and inject the content
-      if (tab == 'questions') {
-        // this.ajax('getHC' + tab);
-        this.getHCquestions();
-      } else if (tab == 'comments') {
-        this.getHCcomments();
-        this.$('.tab_content').html('<br><div class="alert alert-error"><b>Not yet supported</b><br> Only Questions are currently supported, sorry... &nbsp;&nbsp;As the API for Help Center develops so will this app.</div>');
-      } else {
-        // render an error whenever an unsupported tab is chosen
-        this.$('.tab_content').html('<br><div class="alert alert-error"><b>Not yet supported</b><br> Only Questions are currently supported, sorry... &nbsp;&nbsp;As the API for Help Center develops so will this app.</div>');
-      }
-      // 
-    },
-    getHCcomments: function(e) {
-      var startDate;
-      if(e) {
-        //function was called by click
-        e.preventDefault();
-        //gather filter inputs
-          //get start date if one is set
-      }
-      var articles = this.paginate({
-        request : 'getHCarticles',
-        entity  : 'articles',
-        start   : startDate,
-        page    : 1
-      });
-      //since we're using paginate to call the AJAX requests we handle the response right here
-      articles.done(_.bind(function(articles){
-        if(articles.length !== 0) {
-          // do something with articles
-          console.log(articles);
-
-
-
-
-        } else {
-          // hide the loader and show an error
-        }
-      }, this));
-    },
-    getHCquestions: function(e) {
-      var answered = this.store('answered_filter') || 'no'; // TODO make this a setting for default answered value
-      if(e) { // if triggered by a button click (Get Questions)
-        e.preventDefault();
-        // gather the filter form inputs
-        var answeredYes = this.$('input.answered_yes').prop("checked"),
-          answeredNo = this.$('input.answered_no').prop("checked");
-        if (answeredYes && answeredNo || !answeredYes && !answeredNo) {
-          answered = 'both';
-        } else if (answeredYes && !answeredNo) {
-          answered = 'yes';
-        } else if (!answeredYes && answeredNo) {
-          answered = 'no';
-        }
-        // store the answered variable in localStorage for later retrieval
-        this.store( 'answered_filter', answered );
-
-      }
-      // show the loading spinner
-      this.$('.questions_table').html('<div class="spinner dotted"></div>');
-      //this.progressBar('10');
-      // make the request
-      this.ajax('getHCquestions', answered);
-    },
-    gotHCQuestions: function(response, answered) {
-      var questions = response.questions,
-        communities = response.communities,
-        users = response.users;
-      var next_page = response.next_page;
-      var last_page = response.previous_page;
-      if (!next_page && !last_page) {
-      // if this is the only page
-        this.questions = questions;
-        this.users = users;
-        this.communities = communities;
-          console.log("Only one page. Proceeding to process results.");
-          this.renderHCquestions(answered);
-      } else if (next_page && !last_page) {
-      // if this is the first of multiple pages
-        this.questions = questions;
-        this.users = users;
-        this.communities = communities;
-          console.log("First of multiple. Getting next page: " + next_page);
-        this.ajax('getHCquestions', answered, next_page); // get the next page
-
-      } else if (next_page && last_page) {
-      // if this is a middle page (not first, not last)
-        console.log("This pages questions");
-        console.log(questions);
-        this.questions = this.questions.concat(questions);
-        this.users = this.users.concat(users);
-        this.communities = this.communities.concat(communities);
-          console.log("Concantenated questions");
-          console.log(this.questions);
-          console.log("Middle page. Getting next page: " + next_page);
-        this.ajax('getHCquestions', answered, next_page); // get the next page
-        // return; // stop the function
-      } else if (!next_page && last_page) {
-      // if this is the last page
-        this.questions = this.questions.concat(questions);
-        this.users = this.users.concat(users);
-        this.communities = this.communities.concat(communities);
-          console.log(this.questions);
-          console.log("Last page. Proceeding to process results.");
-        this.renderHCquestions(answered);
-      }
-      
-    },
-    renderHCquestions: function(answered) {
-      // once we've loaded the last page fill the local variables with the contents of the global
-      var questions = this.questions;
-      var users = _.uniq(this.users); // remove duplicates (sideloaded)
-      var communities = _.uniq(this.communities); // remove duplicates (sideloaded)
-
-      // process the response data into a format ready for Handlebars
-      var singleCommunity = false;
-      if (communities.length == 1) {
-        singleCommunity = true;
-      }
-      var answeredYes,
-        answeredNo;
-      if (answered == 'yes') {
-        answeredYes = true;
-        answeredNo = false;
-      } else if (answered == 'no') {
-        answeredYes = false;
-        answeredNo = true;
-      } else {
-        answeredYes = true;
-        answeredNo = true;
-      }
-      var encodedQuestions = [];
-      _.each(questions, function(question) {
-        // format the dates
-        question.created_at = new Date(question.created_at);
-        question.created_at = question.created_at.toLocaleString();
-        question.updated_at = new Date(question.updated_at);
-        question.updated_at = question.updated_at.toLocaleString();
-        // find the author name
-        question.author = _.find(users, function(user) {
-          if (user.id == question.author_id) {
-            return true;
-          }
-        });
-        // find the community name
-        question.community = _.find(communities, function(community) {
-          if (community.id == question.community_id) {
-            return true;
-          }
-        });
-        // NOTE topics are not yet sideloaded
-        // also note: questions have an array of topics so this is a bit different that for authors and communities
-        // question.topics = _.filter(topics, function(topic) {
-        //   if (question.topic_ids.indexOf(topic.id) != -1) {
-        //     return true;
-        //   }
-        // });
-        // encode values for a CSV export
-        var encodedQuestion = {
-          id: question.id,
-          title: encodeURIComponent(question.title),
-          author: encodeURIComponent(question.author.name),
-          accepted_answer_id: question.accepted_answer_id,
-          community: encodeURIComponent(question.community.name),
-          vote_sum: question.vote_sum,
-          vote_count: question.vote_count,
-          answer_count: question.answer_count,
-          follower_count: question.follower_count,
-          created_at: encodeURIComponent(question.created_at),
-          updated_at: encodeURIComponent(question.updated_at),
-          details: encodeURIComponent(question.details)
-        };
-        // push the encoded values to the array of encoded values
-        encodedQuestions.push(encodedQuestion);
-      }); //end each questions
-      // render and inject the relevant tab content
-      var html = this.renderTemplate('nav_HC_questions', {
-        questions: questions,
-        communities: communities,
-        singleCommunity: singleCommunity,
-        answeredYes: answeredYes,
-        answeredNo: answeredNo,
-        encodedQuestions: encodedQuestions
-      });
-      this.$('.tab_content').html(html); // inject rendered HTML
-      this.$('#questions').addClass('active'); // make Questions the active tab
-      this.$("[rel=tooltip]").tooltip({ placement: 'right'}); // enable right tooltips
-      this.$("[rel=tooltip-left]").tooltip({ placement: 'left'}); // enable left tooltips
-    },
-    toggleRow: function(e) {
-
-      var id = e.currentTarget.id;
-      var implodedSelector = '#' + id;
-      this.$(implodedSelector).toggleClass("selected_to_explode");
-      var explodedSelector = '.' + id;
-      this.$(explodedSelector).toggleClass("hidden");
     },
 
     // #### Helpers

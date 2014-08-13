@@ -1,6 +1,4 @@
-
-<ul class="show_article">
-  
+<ul class="show_article">  
   <div class="show_article_body well well-small">
     <li class="title"><h4>Title</h4>{{article.title}}</li><br>
     <li class="body"><h4>Body</h4>{{{article.body}}}</li><br>

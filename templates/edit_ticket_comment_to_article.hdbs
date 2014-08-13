@@ -1,7 +1,7 @@
 <ul class="show_comment">
   <li>
     Title: <br>
-    <input type="text" name="title" class="title" placeholder="Posted from ticket #{{ticket_id}} via Ticket to Help Center App"></input>
+    <input type="text" name="title" class="title" placeholder="Posted from ticket #{{ticket_id}} via Outage Notification App"></input>
   </li>
   <li>
     HTML Body: <br>

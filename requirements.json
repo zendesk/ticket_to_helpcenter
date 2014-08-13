@@ -1,0 +1,8 @@
+{
+  "ticket_fields": {
+    "_post_outage_app_article_id": {
+      "type": "text",
+      "title": "Outage Notification ID"
+    }
+  }
+}
