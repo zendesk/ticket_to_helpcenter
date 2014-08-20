@@ -1,23 +1,12 @@
 (function() {
   return {
-    defaultState: 'default',
+    // defaultState: 'default',
     events: {
+      'app.created':'init',
       'click a.default':function(e) {
         if (e) { e.preventDefault(); }
-        this.postType = 'article';
-        this.ajax('getUser');
-        this.segment.identifyAndGroup();
-        this.segment.track('HC | Post Article: initiated');
+        this.fetchComments();
       },
-      'click a.post_comment':function(e) {
-        if (e) { e.preventDefault(); }
-        // this.postType = 'comment';
-        // this.ajax('getUser');
-        this.segment.identifyAndGroup();
-        this.segment.track('HC | Post Comment: initiated');
-      },
-      'getUser.done':'fetchComments',
-      'getUser.fail':'getUserFail',
       'getComments.done':'renderComments',
       'getComments.fail':'getCommentsFail',
       'click li.to_article':'onCommentClick',
@@ -35,32 +24,10 @@
       'click #modal_toggle':'showModal',
       'click .done':'init',
 
-      // include the segment module on app.created
-      'app.created':function() {
-        var Segment = require('segment/segment.js');
-        this.segment = new Segment(this);
-      },
+      'click .delete_article':'deleteArticle',
+      'click .post_changes':'postChanges'
     },
     requests: {
-      // segment requests
-      identify: function(user) {
-        return this.segment.identifyReq(user);
-      },
-      group: function(group) {
-        return this.segment.groupReq(group);
-      },
-      track: function(event) {
-        return this.segment.trackReq(event);
-      },
-      // end segment requests
-      getUser: function() {
-        return {
-          url: '/api/v2/users/me.json',
-          dataType: 'JSON',
-          type: 'GET',
-          proxy_v2: true
-        };
-      },
       getComments: function() {
         return {
           url: helpers.fmt('/api/v2/tickets/%@/comments.json?sort_order=desc&include=users',this.ticket().id()),
@@ -85,24 +52,81 @@
           contentType: 'application/JSON',
           data: article
         };
+      },
+      getRequirementField: function () {
+        return {
+          url: '/api/v2/apps/installations/' + this.installationId() + '/requirements.json', // this.installationId()
+          dataType: 'JSON'
+        };
+      },
+      getStoredArticle: function() {
+        return {
+          url: helpers.fmt('/api/v2/help_center/articles/%@.json', this.storedID),
+          dataType: 'JSON'
+        };
+      },
+      setField: function(articleURL) {
+        var id = this.ticket().id();
+        var rawData = {
+          "ticket": {
+            "custom_fields": [{ "id": this.URLFieldId, "value": articleURL }]
+          }
+        };
+        var data = JSON.stringify(rawData);
+        return {
+          url: helpers.fmt('/api/v2/tickets/%@.json', id),
+          type: 'PUT',
+          dataType: 'JSON',
+          contentType: 'application/JSON',
+          data: data
+        };
+      },
+      putChanges: function (article) {
+        return {
+          url: helpers.fmt('/api/v2/help_center/articles/%@.json', this.storedID),
+          type: 'PUT',
+          dataType: 'JSON',
+          contentType: 'application/JSON',
+          data: article
+        };
+      },
+      putTranslation: function (translation) {
+        return {
+          url: helpers.fmt('/api/v2/help_center/articles/%@/translations/%@.json', this.storedID, this.locale),
+          type: 'PUT',
+          dataType: 'JSON',
+          contentType: 'application/JSON',
+          data: translation
+        };
+      },
+      deleteArticle: function() {
+        return {
+          url: helpers.fmt('/api/v2/help_center/articles/%@.json', this.storedID),
+          type: 'DELETE'
+        };
       }
     },
+    //named functions
     init: function(e) {
       if (e) { e.preventDefault(); }
-      this.switchTo('default', {});
-    },
-    fetchComments: function(data) {
-      var currentUser = data.user;
-      if (this.setting("restrict_to_moderators") === true) {
-        console.log('App is restricted to moderators');
-        if (currentUser.moderator === true) {
-          this.ajax('getComments');
+      
+      this.ajax('getRequirementField')
+      .done(function(response){
+        var requirements = response.requirements;
+        this.URLFieldId = requirements[0].requirement_id;
+        this.storedID = this.ticket().customField('custom_field_' + this.URLFieldId);
+        // debugger;
+        if(this.storedID) {
+          // show the edit page with the value of that field
+          // use a function and pass storedURL to it
+          this.ifURLStored();
         } else {
-          services.notify('This app is currently restricted to moderators and you are not one. Please contact your Zendesk admin to get moderator privileges or get the app unrestricted.', 'error');
+          this.switchTo('default', {});
         }
-      } else {
-        this.ajax('getComments');
-      }
+      });
+    },
+    fetchComments: function() {
+      this.ajax('getComments');
     },
     renderComments: function(data) {
       var comments = data.comments,
@@ -114,16 +138,21 @@
       if (this.postType == 'comment') {
         no_html = true;
       }
-      this.switchTo('comments', {
-        comments: comments,
-        users: users,
-        no_html: no_html
-      });
+      if (comments.length == 1) {
+        this.switchTo('edit_ticket_comment_to_article', {
+          comment: comments[0].html_body,
+          ticket_id: this.ticket().id()
+        });
+      } else {
+        this.switchTo('comments', {
+          comments: comments,
+          users: users,
+          no_html: no_html
+        });
+      }
     },
     onCommentClick: function(e) {
       if (e) { e.preventDefault(); }
-      //switch to the edit_ticket_comment_to_article template with the comment and sections
-      // console.log(e);
       var id = e.currentTarget.children[1].id,
           innerHtml = e.currentTarget.children[1].innerHTML,
           comment = innerHtml,
@@ -132,12 +161,9 @@
           comment: comment,
           ticket_id: ticket_id
       });
-      this.segment.track('HC | Post Article: comment selected');
     },
     onCommentToCommentClick: function(e) {
       if (e) { e.preventDefault(); }
-      //switch to the edit_ticket_comment_to_comment template with the comment and sections
-      // console.log(e);
       var id = e.currentTarget.children[2].id,
           innerHtml = e.currentTarget.children[2].innerHTML,
           comment = innerHtml,
@@ -181,64 +207,12 @@
           locales: locales,
           force_draft: force_draft
         });
-        //TODO also get the available labels and then call jquery UI's autocomplete (or similar)
-        //  /api/v2/help_center/articles/labels.json
       });
       if(e.currentTarget.id == "done_editing_modal") {
         this.title = this.$('input#modal_title').val();
         this.html = this.$('textarea#modal_content').val();
       } else {
         this.title = this.$('input.title').val();
-        this.html = this.$('textarea.show_comment').val();
-      }
-      this.segment.track('HC | Post Article: show article options');
-    },
-    onDoneEditingCommentClick: function (e) {
-      //TODO change this so it works for comments rather than articles
-      if (e) { e.preventDefault(); }
-      this.ajax('getHCarticles')
-      .done(function(response){
-        var articles = response.articles,
-            sections = response.sections,
-            translations = response.translations;
-        _.each(articles, function(article) {
-          //add translations and locales to articles
-          article.translations = [];
-          article.locales = [];
-          _.each(article.translation_ids, function(id) {
-            var translation = _.find(translations, function(obj) {
-              return obj.id == id;
-            });
-            article.translations.push(translation);
-            article.locales.push(translation.locale);
-          });
-        });
-        _.each(sections, function(section) {
-          //add articles to sections
-          section.articles = _.filter(articles, function(article) {
-            return article.section_id == section.id;
-          });
-          section.translations = [];
-          section.locales = [];
-          // add translations and locales to sections
-          _.each(section.translation_ids, function(id) {
-            var translation = _.find(translations, function(obj) {
-              return obj.id == id;
-            });
-            section.translations.push(translation);
-            section.locales.push(translation.locale);
-          });
-        });
-        this.switchTo('comment_options', {
-          sections: sections
-        });
-
-        //TODO also get the available labels and then call jquery UI's autocomplete (or similar)
-        //  /api/v2/help_center/articles/labels.json  
-      });
-      if(e.currentTarget.id == "done_editing_modal") {
-        this.html = this.$('textarea#modal_content').val();
-      } else {
         this.html = this.$('textarea.show_comment').val();
       }
     },
@@ -252,7 +226,7 @@
         locale = this.$('select.locale').val(),
         // since it is only placeholder text, and not a value, I had to add the following two lines to properly post the default title
         ticket_id = this.ticket().id(),
-        default_title = helpers.fmt('From ticket #%@ via Ticket to Help Center App', ticket_id),
+        default_title = helpers.fmt('From ticket #%@ via Outage Notification App', ticket_id),
         title = (this.title || default_title),
         html_single_quotes = this.html.replace(/"/gm, "'"), //replace double quotes with single quotes
         body = html_single_quotes.replace(/(\r\n|\n|\r)/gm," "), //remove line breaks
@@ -280,36 +254,88 @@
       this.ajax('postArticle', article, section)
       .done(function(response){
         var postedArticle = response.article;
+        var storedURL = postedArticle.url;
+        this.storedID = postedArticle.id;
         postedArticle.admin_url = postedArticle.html_url.replace(/hc\/(.*?)\//gi, "hc/admin/");
         postedArticle.edit_url = postedArticle.admin_url + helpers.fmt('/edit?translation_locale=%@', locale);
         services.notify(helpers.fmt("Success! Your outage has been posted to Help Center. Click the <a href='%@' target='blank'>edit link</a> to make changes.",postedArticle.edit_url));
-        this.switchTo('show_article', {
-          article: postedArticle
+        this.ajax('setField', this.storedID)
+        .done(function() {
+          this.switchTo('refresh');
         });
+
       });
-      this.segment.track('HC | Post Article: article posted',{'label_names': label_names,'draft': draft,'promoted': promoted,'comments_disabled': comments_disabled,'locale': locale,'title': title});
     },
     showModal: function() {
       this.$("input#modal_title").val(this.$("input.title").val());
       this.$("textarea#modal_content").val(this.$("textarea.show_comment").val());
       this.$('#modal').modal('show');
-      this.segment.track('HC | show modal');
     },
+    ifURLStored: function() {
+      this.ajax('getStoredArticle')
+      .done(function(response) {
+        var article = response.article;
+        this.locale = article.locale;
+        this.switchTo('edit_article', {
+          article: article
+        });
+      });
+    },
+    postChanges: function(e) {
+      if(e) {e.preventDefault();}
+
+      var label_names = this.$('input.labels').val().split(/\W/),
+        draft = this.$('input.draft').prop("checked"),
+        promoted = this.$('input.promoted').prop("checked"),
+        comments_disabled = this.$('input.comments_disabled').prop("checked"),
+        article_data = {"article": {
+          "label_names": label_names,
+          // "draft": draft,
+          "promoted": promoted,
+          "comments_disabled": comments_disabled,
+          "translations": [{"title": title, "body": body, "draft": draft}]
+        }},
+        article = JSON.stringify(article_data);
+      // post the article
+      this.ajax('putChanges', article)
+      .done(function(response){
+        console.log("Article Changes done");
+      });
+      var title = this.$('.title').val(),
+        html_single_quotes = this.$('.body').val().replace(/"/gm, "'"), //replace double quotes with single quotes
+        body = html_single_quotes.replace(/(\r\n|\n|\r)/gm," "), //remove line breaks
+        translation_data = {"title": title, "body": body, "draft": draft},
+        translation = JSON.stringify(translation_data);
+      this.ajax('putTranslation', translation)
+      .done(function(translation) {
+        console.log("Translation Changes done");
+        this.ifURLStored();
+        services.notify("Success! Your outage post has been updated in Help Center.");
+      });
+    },
+    deleteArticle: function(e) {
+      if(e) {e.preventDefault();}
+      // confirm("Delete the article?");
+      this.ajax('deleteArticle')
+      .done(function(response) {
+        services.notify("Success! Your outage post has been deleted.");
+        this.ajax('setField', '').done(function () {
+          this.switchTo('refresh');
+        });
+      });
+    },
+    // error notifications
     getUserFail: function(data) {
       services.notify('Failed to get the current user for permission check. Please try reloading the app.', 'error');
-      this.segment.track('HC | Error: get user failed', {'error':data});
     },
     getCommentsFail: function(data) {
       services.notify('Failed to get the comments for the current ticket. Please try reloading the app.', 'error');
-      this.segment.track('HC | Error: get comments failed', {'error':data});
     },
     getSectionsFail: function(data) {
       services.notify('Failed to get the available sections for the Help Center. Please try reloading the app.', 'error');
-      this.segment.track('HC | Error: get sections failed', {'error':data});
     },
     postArticleFail: function(data) {
       services.notify('Failed to post to Help Center. Please check that you have permission to create an article in the chosen section and try reloading the app.', 'error');
-      this.segment.track('HC | Error: post article failed', {'error':data});
     },
 
     // #### Helpers
@@ -339,10 +365,6 @@
         });
       });
       return allPages;
-    },
-    progressBar: function(percent) {
-      var html = helpers.fmt('<div class="progress progress-success progress-striped"><div class="bar" style="width: %@%"></div></div>', percent);
-      this.$('.tab_content').html(html);
     }
   };
 }());

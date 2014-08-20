@@ -7,16 +7,22 @@
   "defaultLocale": "en",
   "private": false,
   "location": "ticket_sidebar",
-  "version": "0.0.1",
+  "version": "0.9.0",
   "frameworkVersion": "1.0",
   "parameters":[
     {
-      "name":"restrict_to_moderators",
+      "name":"force_draft",
       "type":"checkbox"
     },
     {
-      "name":"force_draft",
-      "type":"checkbox"
+      "name":"section_id",
+      "type":"text",
+      "default": "200568196"
+    },
+    {
+      "name":"section_label",
+      "type":"text",
+      "default": "Ongoing Outages"
     }
   ]
 }

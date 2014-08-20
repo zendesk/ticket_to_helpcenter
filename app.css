@@ -55,6 +55,20 @@ ul.show_comment {
   }
 
 }
+ul.edit_article {
+  textarea {
+    min-height: 200px;
+    max-height: 700px;
+    width: 310px;
+  }
+  .title {
+    width: 310px;
+  }
+  .labels {
+    width: 310px;
+  }
+
+}
 div#comment_modal, div#article_modal, div#modal {
   width: 80%;
   height: 530px;

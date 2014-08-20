@@ -1,0 +1,57 @@
+<ul class="edit_article">
+  {{#article}}
+  <li> 
+    <a href="{{html_url}}" class="btn" target="blank">Open in Help Center</a>
+  </li>
+  <br>
+  <li>
+    Title: <br>
+    <input type="text" name="title" class="title" value="{{title}}"></input>
+  </li>
+  <br>
+  <li>
+    HTML Body: <br>
+    <textarea class="edit_article body" contenteditable="true">{{body}}</textarea>
+  </li>
+  <br>
+  <li class="article_options">
+    <label>Labels</label>
+    <input type="text" class="labels span2" value="{{#label_names}}{{this}}{{#unless @last}}, {{/unless}}{{/label_names}}" />
+    <br><br>
+    Draft: <input type="checkbox" class="draft" name="draft" {{#if draft}}checked{{/if}} /> | 
+    Promoted: <input type="checkbox" class="promoted" name="promoted" {{#if promoted}}checked{{/if}} /> | 
+    Disable Comments: <input type="checkbox" class="comments_disabled" name="comments_disabled" {{#if comments_disabled}}checked{{/if}} />
+  </li>
+  <li class="actions pull-right">
+    <button type="button" class="delete_article btn">Delete</button> | 
+    {{!-- <button class="btn" id="modal_toggle">Open editor</button> | --}}
+    <input type="submit" class="post_changes btn btn-primary" value="Post Changes">
+  </li>
+
+  {{/article}}
+</ul>
+
+<!-- modal -->
+{{!-- <div id="modal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Help Center App - Post Article</h3>
+  </div>
+  <div class="modal-body">
+    <ul class="show_comment_modal">
+      <li>
+        Title: <br>
+        <input type="text" name="title" class="title" id="modal_title" placeholder="Posted from ticket #{{ticket_id}} via Ticket to Help Center App"></input>
+      </li>
+      <li>
+        HTML Body: <br>
+        <textarea class="show_comment" id="modal_content" contenteditable="true">{{comment}}</textarea>
+      </li>
+    </ul>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close & Cancel</button>
+    <button class="btn" id="close_button" data-dismiss="modal" aria-hidden="true">Close & Save</button>
+    <button class="done_editing_article btn btn-primary" id="done_editing_modal" data-dismiss="modal">Next...</button>
+  </div>
+</div> --}}

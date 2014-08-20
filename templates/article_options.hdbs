@@ -3,7 +3,7 @@
   <li class="article_options">
     <label>Section</label>
     <select id="section_select" class="section" name="select" required>
-      <option value="200568196">Ongoing Outages</option>
+      <option value="{{setting "section_id"}}">{{setting "section_label"}}</option>
       {{#each categories}}
         {{#if sections}}
             <optgroup class="category" label="{{#each translations}}{{this.title}} ({{this.locale}})  
