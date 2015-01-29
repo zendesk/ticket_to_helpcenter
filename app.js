@@ -1,22 +1,17 @@
 (function() {
   return {
     defaultState: 'default',
-    // segmentRequests: require('segment/requests.js'),
     events: {
-      // 'click a.default':function(e) {
-      //   if (e) { e.preventDefault(); }
-      //   this.postType = 'article';
-      //   this.ajax('getUser');
-      //   this.segment.identifyAndGroup();
-      //   this.segment.track('HC | Post Article: initiated');
-      // },
-      // 'click a.post_comment':function(e) {
-      //   if (e) { e.preventDefault(); }
-      //   // this.postType = 'comment';
-      //   // this.ajax('getUser');
-      //   this.segment.identifyAndGroup();
-      //   this.segment.track('HC | Post Comment: initiated');
-      // },
+      'click a.default':function(e) {
+        if (e) { e.preventDefault(); }
+        this.postType = 'article';
+        this.ajax('getUser');
+      },
+      'click a.post_comment':function(e) {
+        if (e) { e.preventDefault(); }
+        // this.postType = 'comment';
+        // this.ajax('getUser');
+      },
       'getUser.done':'fetchComments',
       'getUser.fail':'getUserFail',
       'getComments.done':'renderComments',
@@ -35,31 +30,14 @@
       },
       'click #modal_toggle':'showModal',
       'click .done':'init',
-
       // nav bar events
       'pane.activated':'onPaneActivated',
+
       'click li.tab':'onTabClicked',
       'click .imploded':'toggleRow',
-      'click button.get_questions':'getHCquestions',
-
-      // include the segment module on app.created
-      // 'app.created':function() {
-      //   var Segment = require('segment/segment.js');
-      //   this.segment = new Segment(this);
-      // },
+      'click button.get_questions':'getHCquestions'
     },
     requests: {
-      // segment requests
-      // identify: function(user) {
-      //   return this.segment.identifyReq(user);
-      // },
-      // group: function(group) {
-      //   return this.segment.groupReq(group);
-      // },
-      // track: function(event) {
-      //   return this.segment.trackReq(event);
-      // },
-      // end segment requests
       getUser: function() {
         return {
           url: '/api/v2/users/me.json',
@@ -90,9 +68,11 @@
           type: 'POST',
           dataType: 'JSON',
           contentType: 'application/JSON',
+          proxy_v2: true,
           data: article
         };
       },
+
       // nav bar requests
       getHCquestions: function (answered, next_page) {
         var accepted = '';
@@ -128,6 +108,7 @@
             type: 'GET'
           };
         }
+        
       }
     },
     init: function(e) {
@@ -138,6 +119,7 @@
     onPaneActivated: function(data) {
       if(data.firstLoad) {
         this.loadNavBar();
+
       }
     },
     fetchComments: function(data) {
@@ -161,6 +143,7 @@
       if (this.postType == 'comment') {
         no_html = true;
       }
+      console.log("No html? " + no_html);
       this.switchTo('comments', {
         comments: comments,
         users: users,
@@ -170,7 +153,7 @@
     onCommentClick: function(e) {
       if (e) { e.preventDefault(); }
       //switch to the edit_ticket_comment_to_article template with the comment and sections
-      // console.log(e);
+      console.log(e);
       var id = e.currentTarget.children[1].id,
           innerHtml = e.currentTarget.children[1].innerHTML,
           comment = innerHtml,
@@ -179,12 +162,11 @@
           comment: comment,
           ticket_id: ticket_id
       });
-      this.segment.track('HC | Post Article: comment selected');
     },
     onCommentToCommentClick: function(e) {
       if (e) { e.preventDefault(); }
       //switch to the edit_ticket_comment_to_comment template with the comment and sections
-      // console.log(e);
+      console.log(e);
       var id = e.currentTarget.children[2].id,
           innerHtml = e.currentTarget.children[2].innerHTML,
           comment = innerHtml,
@@ -238,9 +220,9 @@
         this.title = this.$('input.title').val();
         this.html = this.$('textarea.show_comment').val();
       }
-      this.segment.track('HC | Post Article: show article options');
     },
     onDoneEditingCommentClick: function (e) {
+
       //TODO change this so it works for comments rather than articles
       if (e) { e.preventDefault(); }
       this.ajax('getHCarticles')
@@ -281,7 +263,8 @@
         });
 
         //TODO also get the available labels and then call jquery UI's autocomplete (or similar)
-        //  /api/v2/help_center/articles/labels.json  
+        //  /api/v2/help_center/articles/labels.json
+        
       });
       if(e.currentTarget.id == "done_editing_modal") {
         this.html = this.$('textarea#modal_content').val();
@@ -300,6 +283,8 @@
     // },
     onPostArticleClick: function(e) {
       if (e) { e.preventDefault(); }
+
+
       // gather field valudes
       var label_names = this.$('input.labels').val().split(/\W/),
         draft = this.$('input.draft').prop("checked"),
@@ -343,33 +328,26 @@
           article: postedArticle
         });
       });
-      this.segment.track('HC | Post Article: article posted',{'label_names': label_names,'draft': draft,'promoted': promoted,'comments_disabled': comments_disabled,'locale': locale,'title': title});
     },
     showModal: function() {
       this.$("input#modal_title").val(this.$("input.title").val());
       this.$("textarea#modal_content").val(this.$("textarea.show_comment").val());
       this.$('#modal').modal('show');
-      this.segment.track('HC | show modal');
     },
     getUserFail: function(data) {
       services.notify('Failed to get the current user for permission check. Please try reloading the app.', 'error');
-      this.segment.track('HC | Error: get user failed', {'error':data});
     },
     getCommentsFail: function(data) {
       services.notify('Failed to get the comments for the current ticket. Please try reloading the app.', 'error');
-      this.segment.track('HC | Error: get comments failed', {'error':data});
     },
     getSectionsFail: function(data) {
       services.notify('Failed to get the available sections for the Help Center. Please try reloading the app.', 'error');
-      this.segment.track('HC | Error: get sections failed', {'error':data});
     },
     postArticleFail: function(data) {
       services.notify('Failed to post to Help Center. Please check that you have permission to create an article in the chosen section and try reloading the app.', 'error');
-      this.segment.track('HC | Error: post article failed', {'error':data});
     },
 
-    // #### NAVBAR
-    // the navbar code is not running in the production version... yet.
+    // #NAVBAR
 
     loadNavBar: function() {
       if (this.setting("restrict_to_moderators") === true) {
@@ -599,7 +577,8 @@
       this.$(explodedSelector).toggleClass("hidden");
     },
 
-    // #### Helpers
+
+    // Helpers
     paginate: function(a) {
       var results = [];
       var initialRequest = this.ajax(a.request, a.start, a.page);
@@ -631,5 +610,6 @@
       var html = helpers.fmt('<div class="progress progress-success progress-striped"><div class="bar" style="width: %@%"></div></div>', percent);
       this.$('.tab_content').html(html);
     }
+
   };
 }());
