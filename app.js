@@ -3,20 +3,20 @@
     defaultState: 'default',
     // segmentRequests: require('segment/requests.js'),
     events: {
-      'click a.default':function(e) {
-        if (e) { e.preventDefault(); }
-        this.postType = 'article';
-        this.ajax('getUser');
-        this.segment.identifyAndGroup();
-        this.segment.track('HC | Post Article: initiated');
-      },
-      'click a.post_comment':function(e) {
-        if (e) { e.preventDefault(); }
-        // this.postType = 'comment';
-        // this.ajax('getUser');
-        this.segment.identifyAndGroup();
-        this.segment.track('HC | Post Comment: initiated');
-      },
+      // 'click a.default':function(e) {
+      //   if (e) { e.preventDefault(); }
+      //   this.postType = 'article';
+      //   this.ajax('getUser');
+      //   this.segment.identifyAndGroup();
+      //   this.segment.track('HC | Post Article: initiated');
+      // },
+      // 'click a.post_comment':function(e) {
+      //   if (e) { e.preventDefault(); }
+      //   // this.postType = 'comment';
+      //   // this.ajax('getUser');
+      //   this.segment.identifyAndGroup();
+      //   this.segment.track('HC | Post Comment: initiated');
+      // },
       'getUser.done':'fetchComments',
       'getUser.fail':'getUserFail',
       'getComments.done':'renderComments',
@@ -43,22 +43,22 @@
       'click button.get_questions':'getHCquestions',
 
       // include the segment module on app.created
-      'app.created':function() {
-        var Segment = require('segment/segment.js');
-        this.segment = new Segment(this);
-      },
+      // 'app.created':function() {
+      //   var Segment = require('segment/segment.js');
+      //   this.segment = new Segment(this);
+      // },
     },
     requests: {
       // segment requests
-      identify: function(user) {
-        return this.segment.identifyReq(user);
-      },
-      group: function(group) {
-        return this.segment.groupReq(group);
-      },
-      track: function(event) {
-        return this.segment.trackReq(event);
-      },
+      // identify: function(user) {
+      //   return this.segment.identifyReq(user);
+      // },
+      // group: function(group) {
+      //   return this.segment.groupReq(group);
+      // },
+      // track: function(event) {
+      //   return this.segment.trackReq(event);
+      // },
       // end segment requests
       getUser: function() {
         return {
@@ -149,9 +149,7 @@
         } else {
           services.notify('This app is currently restricted to moderators and you are not one. Please contact your Zendesk admin to get moderator privileges or get the app unrestricted.', 'error');
         }
-      } else {
-        this.ajax('getComments');
-      }
+      } else { this.ajax('getComments'); }
     },
     renderComments: function(data) {
       var comments = data.comments,
