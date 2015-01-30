@@ -2,8 +2,6 @@
 
 # Ticket to Help Center App
 
-## Requires [Help Center API Beta Access](https://zendesk.wufoo.com/forms/help-center-api-beta-sign-up/)
-
 ## Description:
 
 This App enables Agents to post public comments from Zendesk tickets as Articles in Help Center. The Agent has a chance to edit the HTML of the comment (including interpreted Markdown, if enabled on the account) before posting, choose the Section in which to post, choose the locale of the article, and choose whether or not it is a Draft, Promoted, or has Comments Disabled. The Agent can then View or Edit the Article in one click.
