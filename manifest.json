@@ -7,7 +7,7 @@
   "defaultLocale": "en",
   "private": false,
   "location": ["ticket_sidebar", "nav_bar"],
-  "version": "1.1.2",
+  "version": "2.0.0b",
   "frameworkVersion": "1.0",
   "parameters":[
     {
@@ -16,6 +16,10 @@
     },
     {
       "name":"force_draft",
+      "type":"checkbox"
+    },
+    {
+      "name":"enable_moderator_beta",
       "type":"checkbox"
     }
   ]

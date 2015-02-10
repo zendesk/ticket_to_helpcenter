@@ -2,15 +2,13 @@
   return {
     defaultState: 'default',
     events: {
-      'click a.default':function(e) {
-        if (e) { e.preventDefault(); }
-        this.postType = 'article';
-        this.ajax('getUser');
-      },
+      'app.activated':'onActivated',
+      'click a.default':'initArticle',
       'click a.post_comment':function(e) {
         if (e) { e.preventDefault(); }
         // this.postType = 'comment';
         // this.ajax('getUser');
+        services.notify("Sorry that feature isn't ready yet.", "error");
       },
       'getUser.done':'fetchComments',
       'getUser.fail':'getUserFail',
@@ -30,6 +28,7 @@
       },
       'click #modal_toggle':'showModal',
       'click .done':'init',
+
       // nav bar events
       'pane.activated':'onPaneActivated',
 
@@ -56,7 +55,7 @@
       },
       getSections: function(html) {
         return {
-          url: '/api/v2/help_center/sections.json?include=categories,translations',
+          url: '/api/v2/help_center/sections.json?include=categories,translations&per_page=100',
           dataType: 'JSON',
           type: 'GET',
           proxy_v2: true
@@ -111,15 +110,39 @@
         
       }
     },
+    onActivated: function() {
+      // console.log("app activated!");
+      if(this.currentLocation() == 'nav_bar' && this.setting("enable_moderator_beta") !== true) {
+        // the nav bar app is loaded but the beta feature IS NOT enabled
+        this.hide();
+        // console.log("feature not enabled!");
+      } else if (this.currentLocation() == 'nav_bar' && this.setting("enable_admin_beta")) {
+        // the nav bar app is loaded and the beta feature IS enabled
+        this.ajax('getUser').done(function(response) {
+          if(!response.user.moderator) {
+            this.hide();//user is not moderator
+          }
+        });
+      }
+    },
     init: function(e) {
+      // render the default template when the user finishes
       if (e) { e.preventDefault(); }
       this.switchTo('default', {});
     },
+    initArticle: function(e) {
+      // start the article flow
+      if (e) { e.preventDefault(); }
+      this.postType = 'article';
+      this.ajax('getUser').done(this.fetchComments(data)); // handling the response here since this request is used twice
+    },
     // load the navbar app if the pane is activated for the first time
+
     onPaneActivated: function(data) {
       if(data.firstLoad) {
-        this.loadNavBar();
-
+        if(this.setting("enable_moderator_beta") === true) {
+          this.loadNavBar();
+        }
       }
     },
     fetchComments: function(data) {
@@ -530,7 +553,7 @@
           }
         });
         // NOTE topics are not yet sideloaded
-        // also note: questions have an array of topics so this is a bit different that for authors and communities
+        // also note: questions have an array of topics so this is a bit different than for authors and communities
         // question.topics = _.filter(topics, function(topic) {
         //   if (question.topic_ids.indexOf(topic.id) != -1) {
         //     return true;
