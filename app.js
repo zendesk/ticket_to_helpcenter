@@ -2,26 +2,23 @@
   return {
     defaultState: 'default',
     events: {
-      'app.activated':'onActivated',
-      'click a.default':'initArticle',
-      'click a.post_comment':function(e) {
-        if (e) { e.preventDefault(); }
-        // this.postType = 'comment';
-        // this.ajax('getUser');
-        services.notify("Sorry that feature isn't ready yet.", "error");
-      },
-      'getUser.done':'fetchComments',
-      'getUser.fail':'getUserFail',
+
       'getComments.done':'renderComments',
-      'getComments.fail':'getCommentsFail',
-      'click li.to_article':'onCommentClick',
-      'click li.to_comment':'onCommentToCommentClick',
-      'getSections.fail':'getSectionsFail',
-      'click #close_button':'copyModalContents',
-      'click .done_editing_article':'onDoneEditingArticleClick',
-      'click .done_editing_comment':'onDoneEditingCommentClick',
-      'click .select_section':'onPostArticleClick',
-      'postArticle.fail':'postArticleFail',
+
+      // COMMENT -> ARTICLE
+      'click a.default'               :'initArticle',
+      'click li.to_article'           :'onCommentClick',//clicked a comment, to post as an article
+      'click #close_button'           :'copyModalContents',
+      'click .done_editing_article'   :'onDoneEditingArticleClick',
+      'click .select_section'         :'onPostArticleClick',
+
+      // COMMENT -> COMMENT
+      'click a.post_comment'          :'initComment',
+      'click li.to_comment'           :'onCommentToCommentClick',//clicked a comment, to post as a comment
+      'click .done_editing_comment'   :'onDoneEditingCommentClick',
+      'click .select_article'         :'onPostCommentClick',
+
+      // Shared
       'click .open_editor':'onOpenEditorClick',
       'click .back_to_comments':function(event) {
         this.ajax('getComments');
@@ -29,36 +26,35 @@
       'click #modal_toggle':'showModal',
       'click .done':'init',
 
-      // nav bar events
-      'pane.activated':'onPaneActivated',
 
+      // nav bar events
+      'app.activated':'onActivated',
+      'pane.activated':'onPaneActivated',
       'click li.tab':'onTabClicked',
       'click .imploded':'toggleRow',
-      'click button.get_questions':'getHCquestions'
+      'click button.get_questions':'getHCquestions',
+
+      // AJAX fail handlers
+      'getUser.fail':'getUserFail',
+      'getComments.fail':'getCommentsFail',
+      'getSections.fail':'getSectionsFail',
+      'postArticle.fail':'postArticleFail',
+      'postComment.fail':'postArticleFail'//shortcut TODO make a postCommentFail handler
     },
     requests: {
       getUser: function() {
         return {
-          url: '/api/v2/users/me.json',
-          dataType: 'JSON',
-          type: 'GET',
-          proxy_v2: true
+          url: '/api/v2/users/me.json'
         };
       },
       getComments: function() {
         return {
-          url: helpers.fmt('/api/v2/tickets/%@/comments.json?sort_order=desc&include=users',this.ticket().id()),
-          dataType: 'JSON',
-          type: 'GET',
-          proxy_v2: true
+          url: helpers.fmt('/api/v2/tickets/%@/comments.json?sort_order=desc&include=users',this.ticket().id())
         };
       },
       getSections: function(html) {
         return {
-          url: '/api/v2/help_center/sections.json?include=categories,translations&per_page=100',
-          dataType: 'JSON',
-          type: 'GET',
-          proxy_v2: true
+          url: '/api/v2/help_center/sections.json?include=categories,translations&per_page=100'
         };
       },
       postArticle: function (article, section) {
@@ -67,11 +63,18 @@
           type: 'POST',
           dataType: 'JSON',
           contentType: 'application/JSON',
-          proxy_v2: true,
           data: article
         };
       },
-
+      postComment: function(article_id, comment_data) {
+        return {
+          url: helpers.fmt('/api/v2/help_center/articles/%@/comments.json', article_id),
+          type: 'POST',
+          dataType: 'JSON',
+          contentType: 'application/JSON',
+          data: JSON.stringify(comment_data)
+        };
+      },
       // nav bar requests
       getHCquestions: function (answered, next_page) {
         var accepted = '';
@@ -94,24 +97,24 @@
           };
         }
       },
+      // shared requests
       getHCarticles: function (start) {
         if (start) {
           //if a start date (ms UTC) is passed...
           return {
-            url: '/api/v2/help_center/incremental/articles.json?include=users,sections,translations&start_time=' + start,
-            type: 'GET'
+            url: '/api/v2/help_center/incremental/articles.json?include=users,sections,translations&start_time=' + start
           };
         } else {
           return {
-            url: '/api/v2/help_center/articles.json?include=users,sections,translations',
-            type: 'GET'
+            url: '/api/v2/help_center/articles.json?include=users,sections,translations'
           };
         }
         
       }
     },
+    // DOM & Framework event handlers
     onActivated: function() {
-      // console.log("app activated!");
+      // routing for nav_bar location
       if(this.currentLocation() == 'nav_bar' && this.setting("enable_moderator_beta") !== true) {
         // the nav bar app is loaded but the beta feature IS NOT enabled
         this.hide();
@@ -125,26 +128,23 @@
         });
       }
     },
-    init: function(e) {
-      // render the default template when the user finishes
-      if (e) { e.preventDefault(); }
-      this.switchTo('default', {});
-    },
-    initArticle: function(e) {
-      // start the article flow
-      if (e) { e.preventDefault(); }
-      this.postType = 'article';
-      this.ajax('getUser').done(this.fetchComments(data)); // handling the response here since this request is used twice
-    },
-    // load the navbar app if the pane is activated for the first time
-
     onPaneActivated: function(data) {
+      // load the navbar app if the pane is activated for the first time
       if(data.firstLoad) {
         if(this.setting("enable_moderator_beta") === true) {
           this.loadNavBar();
         }
       }
     },
+    init: function(e) {
+      // back to the beginning
+      // render the default template when the user finishes
+      if (e) { e.preventDefault(); }
+      this.switchTo('default', {});
+    },
+
+
+    // ## SHARED
     fetchComments: function(data) {
       var currentUser = data.user;
       if (this.setting("restrict_to_moderators") === true) {
@@ -157,6 +157,7 @@
       } else { this.ajax('getComments'); }
     },
     renderComments: function(data) {
+      // NOTE shared between concerns
       var comments = data.comments,
           users = data.users;
       _.each(comments, function(comment) {
@@ -173,17 +174,14 @@
         no_html: no_html
       });
     },
-    onCommentClick: function(e) {
+
+
+    // ## COMMENTS -> COMMENT
+    initComment: function(e) {
       if (e) { e.preventDefault(); }
-      //switch to the edit_ticket_comment_to_article template with the comment and sections
-      console.log(e);
-      var id = e.currentTarget.children[1].id,
-          innerHtml = e.currentTarget.children[1].innerHTML,
-          comment = innerHtml,
-          ticket_id = this.ticket().id();
-      this.switchTo('edit_ticket_comment_to_article', {
-          comment: comment,
-          ticket_id: ticket_id
+      this.postType = 'comment';
+      this.ajax('getUser').done(function(data) {
+        this.fetchComments(data); // handling the response here since this request is used twice
       });
     },
     onCommentToCommentClick: function(e) {
@@ -199,9 +197,106 @@
           ticket_id: ticket_id
       });
     },
-    copyModalContents: function(e) {
-      this.$("input.title").val(this.$("input#modal_title").val());
-      this.$("textarea.show_comment").val(this.$("textarea#modal_content").val());
+    onDoneEditingCommentClick: function (e) {
+      // get the sections with articles, render a menu
+      if (e) { e.preventDefault(); }
+      this.ajax('getHCarticles')
+      .done(function(response){
+        console.dir(response);
+
+        var articles = response.articles,
+            sections = response.sections;
+        _.each(sections, function(section) {
+          //add articles to sections
+          section.articles = _.filter(articles, function(article) {
+            return article.section_id == section.id;
+          });
+        });
+        console.dir(sections);
+        this.switchTo('comment_options', {
+          sections: response.sections
+        });
+      });
+      // handle Done from modal
+      if(e.currentTarget.id == "done_editing_modal") {
+        this.text = this.$('textarea#modal_content').val();
+      } else {
+        this.text = this.$('textarea.show_comment').val();
+      }
+    },
+    onPostCommentClick: function(e) {
+      if (e) { e.preventDefault(); }
+      // gather field values
+      var article_id = this.$('option.translation:selected').attr('data-article-id');
+      var locale = this.$('option.translation:selected').attr('data-locale');
+      var notify_followers = this.$('input.notify_followers').attr('checked');
+      var body = this.text;
+      console.log(article_id);
+      console.log(locale);
+      console.log(notify_followers);
+
+      var ticket_id = this.ticket().id(),
+        comment_data = {"comment": {
+          body: body,
+          locale: locale,
+          notify_followers: notify_followers
+        }};
+      console.dir(comment_data);
+      // field validation
+      if(!locale) {
+        services.notify("No locale specified. Please choose a locale before submitting.", "error");
+        return;
+      }
+      // post the article
+      this.ajax('postComment', article_id, comment_data)
+      .done(function(response){
+        console.log('Comment posted to HC!');
+        console.dir(response);
+        this.switchTo('show_comment', {
+          comment: response.comment
+        });
+      });
+    },
+
+
+    // ## COMMENTS -> ARTICLE
+    initArticle: function(e) {
+      console.log('init article');
+      // start the article flow
+      if (e) { e.preventDefault(); }
+      this.postType = 'article';
+      this.ajax('getUser').done(function(data) {
+        this.fetchComments(data); // handling the response here since this request is used twice
+      });
+    },
+    fetchArticles: function(data) {
+      var currentUser = data.user;
+      if (this.setting("restrict_to_moderators") === true) {
+        console.log('App is restricted to moderators');
+        if (currentUser.moderator === true) {
+          this.ajax('getHCarticles').done(function(response) {
+            this.renderArticles(response);
+          });
+        } else {
+          services.notify('This app is currently restricted to moderators and you are not one. Please contact your Zendesk admin to get moderator privileges or get the app unrestricted.', 'error');
+        }
+      } else { this.ajax('getComments'); }
+    },
+    renderArticles: function(response) {
+      console.dir(e);
+    },
+    onCommentClick: function(e) {
+      if (e) { e.preventDefault(); }
+      //switch to the edit_ticket_comment_to_article template with the comment and sections
+      console.log(e);
+      var id = e.currentTarget.children[1].id,
+          innerHtml = e.currentTarget.children[1].innerHTML,
+          comment = innerHtml,
+          ticket_id = this.ticket().id();
+      this.switchTo('edit_ticket_comment_to_article', {
+          comment: comment,
+          ticket_id: ticket_id
+      });
     },
     onDoneEditingArticleClick: function (e) {
       if (e) { e.preventDefault(); }
@@ -244,70 +339,8 @@
         this.html = this.$('textarea.show_comment').val();
       }
     },
-    onDoneEditingCommentClick: function (e) {
-
-      //TODO change this so it works for comments rather than articles
-      if (e) { e.preventDefault(); }
-      this.ajax('getHCarticles')
-      .done(function(response){
-        var articles = response.articles,
-            sections = response.sections,
-            translations = response.translations;
-        _.each(articles, function(article) {
-          //add translations and locales to articles
-          article.translations = [];
-          article.locales = [];
-          _.each(article.translation_ids, function(id) {
-            var translation = _.find(translations, function(obj) {
-              return obj.id == id;
-            });
-            article.translations.push(translation);
-            article.locales.push(translation.locale);
-          });
-        });
-        _.each(sections, function(section) {
-          //add articles to sections
-          section.articles = _.filter(articles, function(article) {
-            return article.section_id == section.id;
-          });
-          section.translations = [];
-          section.locales = [];
-          // add translations and locales to sections
-          _.each(section.translation_ids, function(id) {
-            var translation = _.find(translations, function(obj) {
-              return obj.id == id;
-            });
-            section.translations.push(translation);
-            section.locales.push(translation.locale);
-          });
-        });
-        this.switchTo('comment_options', {
-          sections: sections
-        });
-
-        //TODO also get the available labels and then call jquery UI's autocomplete (or similar)
-        //  /api/v2/help_center/articles/labels.json
-        
-      });
-      if(e.currentTarget.id == "done_editing_modal") {
-        this.html = this.$('textarea#modal_content').val();
-      } else {
-        this.html = this.$('textarea.show_comment').val();
-      }
-    },
-    // onOpenEditorClick: function(e) {
-    //   if (e) { e.preventDefault(); }
-    //   var title = encodeURIComponent(this.$('input.title').val());
-    //   var body = encodeURIComponent(this.$('textarea.show_comment').text());
-    //   var url = helpers.fmt('https://joeshelpcenter.zendesk.com/hc/admin/articles/new?title=%@&body=%@',title,body);
-    //   this.switchTo('editor_link', {
-    //     url: url
-    //   });
-    // },
     onPostArticleClick: function(e) {
       if (e) { e.preventDefault(); }
-
-
       // gather field valudes
       var label_names = this.$('input.labels').val().split(/\W/),
         draft = this.$('input.draft').prop("checked"),
@@ -352,6 +385,25 @@
         });
       });
     },
+
+
+
+
+    copyModalContents: function(e) {
+      this.$("input.title").val(this.$("input#modal_title").val());
+      this.$("textarea.show_comment").val(this.$("textarea#modal_content").val());
+    },
+    
+    // onOpenEditorClick: function(e) {
+    //   if (e) { e.preventDefault(); }
+    //   var title = encodeURIComponent(this.$('input.title').val());
+    //   var body = encodeURIComponent(this.$('textarea.show_comment').text());
+    //   var url = helpers.fmt('https://joeshelpcenter.zendesk.com/hc/admin/articles/new?title=%@&body=%@',title,body);
+    //   this.switchTo('editor_link', {
+    //     url: url
+    //   });
+    // },
+    
     showModal: function() {
       this.$("input#modal_title").val(this.$("input.title").val());
       this.$("textarea#modal_content").val(this.$("textarea.show_comment").val());
@@ -370,8 +422,10 @@
       services.notify('Failed to post to Help Center. Please check that you have permission to create an article in the chosen section and try reloading the app.', 'error');
     },
 
-    // #NAVBAR
 
+
+
+    // ## NAVBAR
     loadNavBar: function() {
       if (this.setting("restrict_to_moderators") === true) {
         var me = this.currentUser();
@@ -390,18 +444,15 @@
       this.getHCquestions();
     },
     onTabClicked: function(e) {
-      if(e) {e.preventDefault();}
+      e.preventDefault();
       var tab = e.currentTarget.id;
-      console.log("Tab: " + tab);
-
       // select the clicked tab
-      var selector = '#' + tab;
       this.$('li.tab').removeClass('active');
-      this.$(selector).addClass('active');
-      //this.progressBar('0');
+      this.$('#' + tab).addClass('active');
+
+      //this.progressBar('0'); //TODO
       this.$('.questions_table').html('<div class="spinner dotted"></div>');
 
-      // TODO: get the corresponding objects, the success of which should render and inject the content
       if (tab == 'questions') {
         // this.ajax('getHC' + tab);
         this.getHCquestions();
@@ -415,6 +466,7 @@
       // 
     },
     getHCcomments: function(e) {
+      // NOTE this is shared
       var startDate;
       if(e) {
         //function was called by click
@@ -508,7 +560,6 @@
           console.log("Last page. Proceeding to process results.");
         this.renderHCquestions(answered);
       }
-      
     },
     renderHCquestions: function(answered) {
       // once we've loaded the last page fill the local variables with the contents of the global

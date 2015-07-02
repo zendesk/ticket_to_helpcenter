@@ -1,0 +1,14 @@
+
+<ul class="show_comment">
+  
+  <div class="show_comment_body well well-small">
+    <li class="body">{{{comment.body}}}</li>
+    <br>
+  </div>
+  <li class="comment_links">
+    <a href="{{comment.html_url}}" class="btn btn-small" target="blank">View</a>
+  </li>
+  <li>
+    <button class="done btn btn-primary pull-right">Done</button>
+  </li>
+</ul>

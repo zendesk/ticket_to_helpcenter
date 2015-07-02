@@ -9,7 +9,9 @@
           {{#each articles}}
             <option class="article" disabled>{{title}}</option>
             {{#each translations}}
-              <option class="translation" value="{{this.id}}">&nbsp;&nbsp;&nbsp;&nbsp;{{this.title}} ({{this.locale}})</option>
+              <option class="translation" value="{{id}}" data-article-id="{{source_id}}" data-locale="{{locale}}">
+                &nbsp;&nbsp;&nbsp;&nbsp;{{title}} ({{locale}})
+              </option>
             {{/each}}
           {{/each}}
         </optgroup>
